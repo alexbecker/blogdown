@@ -5,10 +5,7 @@ import Text.Parsec hiding (Line)
 data AST = AST [Block]
     deriving (Show)
 
-data Block = ParagraphBlock Paragraph
-    deriving (Show)
-
-data Paragraph = Paragraph [Line]
+data Block = Paragraph [Line]
     deriving (Show)
 
 data Line = Line [Inline]
@@ -28,7 +25,7 @@ data Bold = Bold String
     deriving (Show)
 
 data Link = Link {
-    text :: String,
+    text :: Line,
     href :: String
 }
     deriving (Show)

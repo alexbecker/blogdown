@@ -9,16 +9,14 @@ import AST
 class ToHtml a where
     toHtml :: a -> String
 
+instance ToHtml AST where
+    toHtml (AST bs) = unlines $ map toHtml bs
+
+fancyUnlines :: [String] -> String
 fancyUnlines = concat . intersperse "\n"
 
-instance ToHtml AST where
-    toHtml (AST bs) = fancyUnlines $ map toHtml bs
-
 instance ToHtml Block where
-    toHtml (ParagraphBlock p) = toHtml p
-
-instance ToHtml Paragraph where
-    toHtml (Paragraph ls) = unlines $ map toHtml ls
+    toHtml (Paragraph ls) = "<p>" ++ fancyUnlines (map toHtml ls) ++ "</p>"
 
 instance ToHtml Line where
     toHtml (Line is) = concatMap toHtml is
@@ -37,7 +35,7 @@ instance ToHtml Bold where
     toHtml (Bold s) = "<b>" ++ s ++ "</b>"
 
 instance ToHtml Link where
-    toHtml l = "<a href=\"" ++ href l ++ "\">" ++ text l ++ "</a>"
+    toHtml l = "<a href=\"" ++ href l ++ "\">" ++ toHtml (text l) ++ "</a>"
 
 instance ToHtml Attr where
     toHtml (Attr s t) = s ++ if (t /= "") then "=\"" ++ t ++ "\"" else ""

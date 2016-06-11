@@ -8,7 +8,7 @@ import Render
 
 main :: IO ()
 main = do
-    line <- getLine
-    let result = parse ast "test" line
+    input <- getContents
+    let result = parse ast "test" input
     putStrLn $ show result
     putStr $ either (\_ -> "") toHtml result

@@ -1,5 +1,6 @@
 module Parse where
 
+import Data.Maybe
 import Text.Parsec hiding (Line)
 import Text.Parsec.Char
 
@@ -8,7 +9,7 @@ import AST
 type Parser = Parsec String ()
 
 nonSpecial :: Parser Char
-nonSpecial = noneOf "<>*[]()"
+nonSpecial = noneOf "*<>[]()"
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -54,24 +55,31 @@ italics = fmap Italics $ between (char '*') (char '*') $ many1 nonSpecial
 
 link :: Parser Link
 link = do
-    text <- between (char '[') (char ']') $ many1 nonSpecial
+    text <- between (char '[') (char ']') line
     href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf ")")
     return $ Link {text=text, href=href}
 
+plaintext :: Parser String
+plaintext = many1 $ noneOf "*<>[]()\r\n"
+
 inline :: Parser Inline
-inline = fmap InlineBold bold <|> fmap InlineItalics italics <|> fmap InlineLink link <|> fmap InlineHtml html <|> fmap Plaintext (many1 nonSpecial)
+inline = choice [fmap InlineBold bold,
+                 fmap InlineItalics italics,
+                 fmap InlineLink link,
+                 fmap InlineHtml html,
+                 fmap Plaintext plaintext]
 
 line :: Parser Line
 line = fmap Line (many1 inline)
 
-paragraph :: Parser Paragraph
-paragraph = fmap Paragraph (sepEndBy1 line $ char '\n')
+paragraph :: Parser Block
+paragraph = do
+    ls <- sepEndBy1 line (char '\n' <|> (eof >> return '\n'))
+    many $ char '\n'
+    return $ Paragraph ls
 
 block :: Parser Block
-block = do
-    p <- paragraph
-    char '\n' <|> (eof >> return '\n')
-    return $ ParagraphBlock p
+block = paragraph
 
 ast :: Parser AST
 ast = fmap AST (many block)
