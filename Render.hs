@@ -32,6 +32,7 @@ instance ToHtml Inline where
 instance ToHtml LinkContents where
     toHtml (InlineItalics i) = toHtml i
     toHtml (InlineBold b) = toHtml b
+    toHtml (InlineCode c) = toHtml c
     toHtml (InlineHtml h) = toHtml h
     toHtml (Plaintext s) = s
 
@@ -40,6 +41,9 @@ instance ToHtml Italics where
 
 instance ToHtml Bold where
     toHtml (Bold s) = withTag "b" s
+
+instance ToHtml Code where
+    toHtml (Code s) = withTag "code" s
 
 instance ToHtml Link where
     toHtml l = "<a href=\"" ++ href l ++ "\">" ++ toHtml (text l) ++ "</a>"

@@ -18,6 +18,7 @@ data Inline = InlineLink Link
 
 data LinkContents = InlineItalics Italics
                   | InlineBold Bold
+                  | InlineCode Code
                   | InlineHtml Html
                   | Plaintext String
     deriving (Show)
@@ -26,6 +27,9 @@ data Italics = Italics String
     deriving (Show)
 
 data Bold = Bold String
+    deriving (Show)
+
+data Code = Code String
     deriving (Show)
 
 data Link = Link {

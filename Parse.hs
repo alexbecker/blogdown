@@ -8,7 +8,7 @@ import AST
 
 type Parser = Parsec String ()
 
-specials = "*#<>[]()"
+specials = "*#`<>[]()"
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -52,6 +52,9 @@ bold = try $ fmap Bold $ between (string "**") (string "**") $ many1 $ noneOf sp
 italics :: Parser Italics
 italics = fmap Italics $ between (char '*') (char '*') $ many1 $ noneOf specials
 
+code :: Parser Code
+code = fmap Code $ between (char '`') (char '`') $ many1 $ noneOf "`"
+
 link :: Parser Link
 link = do
     text <- between (char '[') (char ']') linkcontents
@@ -61,6 +64,7 @@ link = do
 linkcontents :: Parser LinkContents
 linkcontents = choice [fmap InlineBold bold,
                        fmap InlineItalics italics,
+                       fmap InlineCode code,
                        fmap InlineHtml html,
                        fmap Plaintext (many1 $ noneOf ('\n' : specials))]
 
