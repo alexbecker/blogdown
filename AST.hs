@@ -12,11 +12,14 @@ data Block = Paragraph [Line]
 data Line = Line [Inline]
     deriving (Show)
 
-data Inline = InlineItalics Italics
-            | InlineBold Bold
-            | InlineLink Link
-            | InlineHtml Html
-            | Plaintext String
+data Inline = InlineLink Link
+            | InlineNonLink LinkContents
+    deriving (Show)
+
+data LinkContents = InlineItalics Italics
+                  | InlineBold Bold
+                  | InlineHtml Html
+                  | Plaintext String
     deriving (Show)
 
 data Italics = Italics String
@@ -26,7 +29,7 @@ data Bold = Bold String
     deriving (Show)
 
 data Link = Link {
-    text :: Line,
+    text :: LinkContents,
     href :: String
 }
     deriving (Show)

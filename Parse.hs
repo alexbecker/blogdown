@@ -54,16 +54,18 @@ italics = fmap Italics $ between (char '*') (char '*') $ many1 $ noneOf specials
 
 link :: Parser Link
 link = do
-    text <- between (char '[') (char ']') line
+    text <- between (char '[') (char ']') linkcontents
     href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf ")")
     return $ Link {text=text, href=href}
 
+linkcontents :: Parser LinkContents
+linkcontents = choice [fmap InlineBold bold,
+                       fmap InlineItalics italics,
+                       fmap InlineHtml html,
+                       fmap Plaintext (many1 $ noneOf ('\n' : specials))]
+
 inline :: Parser Inline
-inline = choice [fmap InlineBold bold,
-                 fmap InlineItalics italics,
-                 fmap InlineLink link,
-                 fmap InlineHtml html,
-                 fmap Plaintext (many1 $ noneOf ('\n' : specials))]
+inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents
 
 line :: Parser Line
 line = fmap Line (many1 inline)

@@ -26,9 +26,12 @@ instance ToHtml Line where
     toHtml (Line is) = concatMap toHtml is
 
 instance ToHtml Inline where
+    toHtml (InlineLink l) = toHtml l
+    toHtml (InlineNonLink s) = toHtml s
+
+instance ToHtml LinkContents where
     toHtml (InlineItalics i) = toHtml i
     toHtml (InlineBold b) = toHtml b
-    toHtml (InlineLink l) = toHtml l
     toHtml (InlineHtml h) = toHtml h
     toHtml (Plaintext s) = s
 
