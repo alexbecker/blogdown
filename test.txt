@@ -11,5 +11,7 @@ don't **you** know?
 new paragraph
 
 single `line`
+ * this one
+ * starts a list
 
 eof

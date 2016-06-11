@@ -21,6 +21,7 @@ fancyUnlines = concat . intersperse "\n"
 instance ToHtml Block where
     toHtml (Paragraph ls) = withTag "p" $ fancyUnlines $ map toHtml ls
     toHtml (Header level text) = withTag ("h" ++ show level ) $ toHtml text
+    toHtml (UnorderedList lis) = withTag "ul" $ unlines $ map (withTag "li" . toHtml) lis
 
 instance ToHtml Line where
     toHtml (Line is) = concatMap toHtml is

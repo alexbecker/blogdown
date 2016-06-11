@@ -72,7 +72,11 @@ inline :: Parser Inline
 inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents
 
 line :: Parser Line
-line = fmap Line (many1 inline)
+line = do
+    startingSpace <- optionMaybe $ lookAhead $ char ' '
+    if isJust startingSpace
+        then fail "line cannot begin with a space"
+        else fmap Line $ many1 inline
 
 paragraph :: Parser Block
 paragraph = do
@@ -88,8 +92,15 @@ header = do
     many $ char '\n'
     return $ Header (length hashes) text
 
+unorderedList :: Parser Block
+unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ do
+    many $ char ' '
+    char '*'
+    many $ char ' '
+    line
+
 block :: Parser Block
-block = paragraph <|> header
+block = paragraph <|> header <|> unorderedList
 
 ast :: Parser AST
 ast = fmap AST (many block)
