@@ -26,6 +26,7 @@ instance ToHtml Line where
 instance ToHtml Inline where
     toHtml (InlineItalics i) = toHtml i
     toHtml (InlineBold b) = toHtml b
+    toHtml (InlineLink l) = toHtml l
     toHtml (InlineHtml h) = toHtml h
     toHtml (Plaintext s) = s
 
@@ -34,6 +35,9 @@ instance ToHtml Italics where
 
 instance ToHtml Bold where
     toHtml (Bold s) = "<b>" ++ s ++ "</b>"
+
+instance ToHtml Link where
+    toHtml l = "<a href=\"" ++ href l ++ "\">" ++ text l ++ "</a>"
 
 instance ToHtml Attr where
     toHtml (Attr s t) = s ++ if (t /= "") then "=\"" ++ t ++ "\"" else ""

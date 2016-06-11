@@ -16,6 +16,7 @@ data Line = Line [Inline]
 
 data Inline = InlineItalics Italics
             | InlineBold Bold
+            | InlineLink Link
             | InlineHtml Html
             | Plaintext String
     deriving (Show)
@@ -24,6 +25,12 @@ data Italics = Italics String
     deriving (Show)
 
 data Bold = Bold String
+    deriving (Show)
+
+data Link = Link {
+    text :: String,
+    href :: String
+}
     deriving (Show)
 
 data HtmlTagType = Open | Close | SelfClosing

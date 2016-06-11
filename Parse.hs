@@ -7,6 +7,9 @@ import AST
 
 type Parser = Parsec String ()
 
+nonSpecial :: Parser Char
+nonSpecial = noneOf "<>*[]()"
+
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
     if tagType == Close then string "</" else string "<"
@@ -44,13 +47,19 @@ attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many1 $ noneOf "\"")
 
 bold :: Parser Bold
-bold = fmap Bold $ between (string "**") (string "**") (many1 $ noneOf "<>*")
+bold = try $ fmap Bold $ between (string "**") (string "**") $ many1 nonSpecial
 
 italics :: Parser Italics
-italics = fmap Italics $ between (char '*') (char '*') (many1 $ noneOf "<>*")
+italics = fmap Italics $ between (char '*') (char '*') $ many1 nonSpecial
+
+link :: Parser Link
+link = do
+    text <- between (char '[') (char ']') $ many1 nonSpecial
+    href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf ")")
+    return $ Link {text=text, href=href}
 
 inline :: Parser Inline
-inline = fmap InlineBold bold <|> fmap InlineItalics italics <|> fmap InlineHtml html <|> fmap Plaintext (many1 $ noneOf "<>*")
+inline = fmap InlineBold bold <|> fmap InlineItalics italics <|> fmap InlineLink link <|> fmap InlineHtml html <|> fmap Plaintext (many1 nonSpecial)
 
 line :: Parser Line
 line = fmap Line (many1 inline)
