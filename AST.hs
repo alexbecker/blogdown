@@ -16,10 +16,10 @@ data Inline = InlineLink Link
             | InlineNonLink LinkContents
     deriving (Show)
 
-data LinkContents = InlineItalics Italics
-                  | InlineBold Bold
-                  | InlineCode Code
-                  | InlineHtml Html
+data LinkContents = LCItalics Italics
+                  | LCBold Bold
+                  | LCCode Code
+                  | LCHtml Html
                   | Plaintext String
     deriving (Show)
 

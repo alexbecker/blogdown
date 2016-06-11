@@ -62,10 +62,10 @@ link = do
     return $ Link {text=text, href=href}
 
 linkcontents :: Parser LinkContents
-linkcontents = choice [fmap InlineBold bold,
-                       fmap InlineItalics italics,
-                       fmap InlineCode code,
-                       fmap InlineHtml html,
+linkcontents = choice [fmap LCBold bold,
+                       fmap LCItalics italics,
+                       fmap LCCode code,
+                       fmap LCHtml html,
                        fmap Plaintext (many1 $ noneOf ('\n' : specials))]
 
 inline :: Parser Inline

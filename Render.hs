@@ -30,10 +30,10 @@ instance ToHtml Inline where
     toHtml (InlineNonLink s) = toHtml s
 
 instance ToHtml LinkContents where
-    toHtml (InlineItalics i) = toHtml i
-    toHtml (InlineBold b) = toHtml b
-    toHtml (InlineCode c) = toHtml c
-    toHtml (InlineHtml h) = toHtml h
+    toHtml (LCItalics i) = toHtml i
+    toHtml (LCBold b) = toHtml b
+    toHtml (LCCode c) = toHtml c
+    toHtml (LCHtml h) = toHtml h
     toHtml (Plaintext s) = s
 
 instance ToHtml Italics where
