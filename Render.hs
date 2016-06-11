@@ -12,11 +12,15 @@ class ToHtml a where
 instance ToHtml AST where
     toHtml (AST bs) = unlines $ map toHtml bs
 
+withTag :: String -> String -> String
+withTag tag content = "<" ++ tag ++ ">" ++ content ++ "</" ++ tag ++ ">"
+
 fancyUnlines :: [String] -> String
 fancyUnlines = concat . intersperse "\n"
 
 instance ToHtml Block where
-    toHtml (Paragraph ls) = "<p>" ++ fancyUnlines (map toHtml ls) ++ "</p>"
+    toHtml (Paragraph ls) = withTag "p" $ fancyUnlines $ map toHtml ls
+    toHtml (Header level text) = withTag ("h" ++ show level ) $ toHtml text
 
 instance ToHtml Line where
     toHtml (Line is) = concatMap toHtml is
@@ -29,10 +33,10 @@ instance ToHtml Inline where
     toHtml (Plaintext s) = s
 
 instance ToHtml Italics where
-    toHtml (Italics s) = "<i>" ++ s ++ "</i>"
+    toHtml (Italics s) = withTag "i" s
 
 instance ToHtml Bold where
-    toHtml (Bold s) = "<b>" ++ s ++ "</b>"
+    toHtml (Bold s) = withTag "b" s
 
 instance ToHtml Link where
     toHtml l = "<a href=\"" ++ href l ++ "\">" ++ toHtml (text l) ++ "</a>"

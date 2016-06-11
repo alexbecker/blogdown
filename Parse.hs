@@ -8,8 +8,7 @@ import AST
 
 type Parser = Parsec String ()
 
-nonSpecial :: Parser Char
-nonSpecial = noneOf "*<>[]()"
+specials = "*#<>[]()"
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -48,10 +47,10 @@ attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many1 $ noneOf "\"")
 
 bold :: Parser Bold
-bold = try $ fmap Bold $ between (string "**") (string "**") $ many1 nonSpecial
+bold = try $ fmap Bold $ between (string "**") (string "**") $ many1 $ noneOf specials
 
 italics :: Parser Italics
-italics = fmap Italics $ between (char '*') (char '*') $ many1 nonSpecial
+italics = fmap Italics $ between (char '*') (char '*') $ many1 $ noneOf specials
 
 link :: Parser Link
 link = do
@@ -59,15 +58,12 @@ link = do
     href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf ")")
     return $ Link {text=text, href=href}
 
-plaintext :: Parser String
-plaintext = many1 $ noneOf "*<>[]()\r\n"
-
 inline :: Parser Inline
 inline = choice [fmap InlineBold bold,
                  fmap InlineItalics italics,
                  fmap InlineLink link,
                  fmap InlineHtml html,
-                 fmap Plaintext plaintext]
+                 fmap Plaintext (many1 $ noneOf ('\n' : specials))]
 
 line :: Parser Line
 line = fmap Line (many1 inline)
@@ -78,8 +74,16 @@ paragraph = do
     many $ char '\n'
     return $ Paragraph ls
 
+header :: Parser Block
+header = do
+    hashes <- many1 $ char '#'
+    many1 $ char ' '
+    text <- line
+    many $ char '\n'
+    return $ Header (length hashes) text
+
 block :: Parser Block
-block = paragraph
+block = paragraph <|> header
 
 ast :: Parser AST
 ast = fmap AST (many block)

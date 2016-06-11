@@ -6,6 +6,7 @@ data AST = AST [Block]
     deriving (Show)
 
 data Block = Paragraph [Line]
+           | Header Int Line
     deriving (Show)
 
 data Line = Line [Inline]
