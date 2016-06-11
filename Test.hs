@@ -9,5 +9,6 @@ import Render
 main :: IO ()
 main = do
     line <- getLine
-    let result = parse html "test" line
-    putStrLn $ either (\_ -> "") toHtml result
+    let result = parse ast "test" line
+    putStrLn $ show result
+    putStr $ either (\_ -> "") toHtml result

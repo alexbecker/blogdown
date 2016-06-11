@@ -43,15 +43,26 @@ attr = do
 attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many1 $ noneOf "\"")
 
-italics' :: Parser String
-italics' = between (char '*') (char '*') (many1 $ noneOf "*")
+bold :: Parser Bold
+bold = fmap Bold $ between (string "**") (string "**") (many1 $ noneOf "<>*")
 
 italics :: Parser Italics
-italics = italics' >>= return . Italics
-
-bold :: Parser Bold
-bold = fmap Bold $ between (char '*') (char '*') italics'
+italics = fmap Italics $ between (char '*') (char '*') (many1 $ noneOf "<>*")
 
 inline :: Parser Inline
-inline = choice [try (italics >>= return . InlineItalics),
-                 bold >>= return . InlineBold]
+inline = fmap InlineBold bold <|> fmap InlineItalics italics <|> fmap InlineHtml html <|> fmap Plaintext (many1 $ noneOf "<>*")
+
+line :: Parser Line
+line = fmap Line (many1 inline)
+
+paragraph :: Parser Paragraph
+paragraph = fmap Paragraph (sepEndBy1 line $ char '\n')
+
+block :: Parser Block
+block = do
+    p <- paragraph
+    char '\n' <|> (eof >> return '\n')
+    return $ ParagraphBlock p
+
+ast :: Parser AST
+ast = fmap AST (many block)
