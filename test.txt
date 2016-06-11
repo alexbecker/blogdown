@@ -1,0 +1,7 @@
+*italics*
+**bold**
+
+this is a test,
+don't **you** know?
+
+[google](https://google.com)
