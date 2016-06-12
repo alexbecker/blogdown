@@ -131,4 +131,4 @@ block :: Parser Block
 block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
 
 ast :: Parser AST
-ast = fmap AST (many block)
+ast = fmap AST $ many block
