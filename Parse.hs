@@ -93,14 +93,21 @@ header = do
     return $ Header (length hashes) text
 
 unorderedList :: Parser Block
-unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ do
+unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ try $ do
     many $ char ' '
     char '*'
     many $ char ' '
     line
 
+blockQuote :: Parser Block
+blockQuote = fmap BlockQuote $ flip sepEndBy1 (char '\n') $ try $ do
+    many $ char ' '
+    char '>'
+    many $ char ' '
+    line
+
 block :: Parser Block
-block = paragraph <|> header <|> unorderedList
+block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote]
 
 ast :: Parser AST
 ast = fmap AST (many block)

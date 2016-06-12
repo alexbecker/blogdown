@@ -8,6 +8,7 @@ data AST = AST [Block]
 data Block = Paragraph [Line]
            | Header Int Line
            | UnorderedList [Line]
+           | BlockQuote [Line]
     deriving (Show)
 
 data Line = Line [Inline]
