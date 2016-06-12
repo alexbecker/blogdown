@@ -10,6 +10,7 @@ data Block = Paragraph [Line]
            | UnorderedList [Line]
            | BlockQuote [Line]
            | BlockCode [String]
+           | FootnoteDef String [Line]
     deriving (Show)
 
 data Line = Line [Inline]
@@ -17,6 +18,7 @@ data Line = Line [Inline]
 
 data Inline = InlineLink Link
             | InlineNonLink LinkContents
+            | InlineFootnoteRef FootnoteRef
     deriving (Show)
 
 data LinkContents = LCItalics Italics
@@ -39,6 +41,9 @@ data Link = Link {
     text :: LinkContents,
     href :: String
 }
+    deriving (Show)
+
+data FootnoteRef = FootnoteRef String
     deriving (Show)
 
 data HtmlTagType = Open | Close | SelfClosing

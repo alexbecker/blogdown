@@ -8,7 +8,7 @@ import AST
 
 type Parser = Parsec String ()
 
-specials = "*#`<>[]()"
+specials = "*#`^~<>[]"
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -58,7 +58,7 @@ code = fmap Code $ between (char '`') (char '`') $ many1 $ noneOf "`"
 link :: Parser Link
 link = do
     text <- between (char '[') (char ']') linkcontents
-    href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf ")")
+    href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf (')' : specials))
     return $ Link {text=text, href=href}
 
 linkcontents :: Parser LinkContents
@@ -68,8 +68,22 @@ linkcontents = choice [fmap LCBold bold,
                        fmap LCHtml html,
                        fmap Plaintext (many1 $ noneOf ('\n' : specials))]
 
+footnoteRef :: Parser FootnoteRef
+footnoteRef = do
+    char '^'
+    identifier <- between (char '[') (char ']') $ many1 alphaNum
+    return $ FootnoteRef identifier
+
+footnoteDef :: Parser Block
+footnoteDef = do
+    char '~'
+    identifier <- between (char '[') (char ']') $ many1 alphaNum
+    many $ oneOf " \t"
+    content <- many1 line
+    return $ FootnoteDef identifier content
+
 inline :: Parser Inline
-inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents
+inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents <|> fmap InlineFootnoteRef footnoteRef
 
 line :: Parser Line
 line = do
@@ -113,7 +127,7 @@ blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
     many $ noneOf "\n"
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote, blockCode]
+block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
 
 ast :: Parser AST
 ast = fmap AST (many block)

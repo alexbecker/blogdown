@@ -24,6 +24,7 @@ instance ToHtml Block where
     toHtml (UnorderedList ls) = withTag "ul" $ unlines $ map (withTag "li" . toHtml) ls
     toHtml (BlockQuote ls) = withTag "blockquote" $ fancyUnlines $ map toHtml ls
     toHtml (BlockCode s) = withTag "pre" $ withTag "code" $ unlines s
+    toHtml (FootnoteDef identifier ls) = "<p id=\"footnote-" ++ identifier ++ "\">" ++ (fancyUnlines $ map toHtml ls) ++ "</p>"
 
 instance ToHtml Line where
     toHtml (Line is) = concatMap toHtml is
@@ -31,6 +32,10 @@ instance ToHtml Line where
 instance ToHtml Inline where
     toHtml (InlineLink l) = toHtml l
     toHtml (InlineNonLink s) = toHtml s
+    toHtml (InlineFootnoteRef f) = toHtml f
+
+instance ToHtml FootnoteRef where
+    toHtml (FootnoteRef identifier) = withTag "sup" ("<a href=\"" ++ "#footnote-" ++ identifier ++ "\">[" ++ "0" ++ "]</a>")
 
 instance ToHtml LinkContents where
     toHtml (LCItalics i) = toHtml i

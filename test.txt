@@ -20,4 +20,9 @@ single `line`
     a block of code
     is a great thing indeed
 
+
+what kind of^[footnote]
+
+~[footnote] this kind
+
 eof
