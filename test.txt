@@ -17,4 +17,7 @@ single `line`
  > quoting
  > 2013
 
+    a block of code
+    is a great thing indeed
+
 eof

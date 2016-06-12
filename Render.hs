@@ -23,6 +23,7 @@ instance ToHtml Block where
     toHtml (Header level text) = withTag ("h" ++ show level ) $ toHtml text
     toHtml (UnorderedList ls) = withTag "ul" $ unlines $ map (withTag "li" . toHtml) ls
     toHtml (BlockQuote ls) = withTag "blockquote" $ fancyUnlines $ map toHtml ls
+    toHtml (BlockCode s) = withTag "pre" $ withTag "code" $ unlines s
 
 instance ToHtml Line where
     toHtml (Line is) = concatMap toHtml is

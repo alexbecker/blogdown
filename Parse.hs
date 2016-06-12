@@ -73,9 +73,9 @@ inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents
 
 line :: Parser Line
 line = do
-    startingSpace <- optionMaybe $ lookAhead $ char ' '
+    startingSpace <- optionMaybe $ lookAhead $ oneOf " \t"
     if isJust startingSpace
-        then fail "line cannot begin with a space"
+        then fail "line cannot begin with a space or tab"
         else fmap Line $ many1 inline
 
 paragraph :: Parser Block
@@ -96,18 +96,24 @@ unorderedList :: Parser Block
 unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ try $ do
     many $ char ' '
     char '*'
-    many $ char ' '
+    many $ oneOf " \t"
     line
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ flip sepEndBy1 (char '\n') $ try $ do
     many $ char ' '
     char '>'
-    many $ char ' '
+    many $ oneOf " \t"
     line
 
+blockCode :: Parser Block
+blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
+    char '\t' <|> (string "    " >> return '\t')
+    many $ oneOf " \t"
+    many $ noneOf "\n"
+
 block :: Parser Block
-block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote]
+block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote, blockCode]
 
 ast :: Parser AST
 ast = fmap AST (many block)

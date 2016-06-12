@@ -9,6 +9,7 @@ data Block = Paragraph [Line]
            | Header Int Line
            | UnorderedList [Line]
            | BlockQuote [Line]
+           | BlockCode [String]
     deriving (Show)
 
 data Line = Line [Inline]
