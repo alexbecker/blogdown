@@ -32,26 +32,14 @@ instance ToHtml Line where
 instance ToHtml Inline where
     toHtml (InlineLink l) = toHtml l
     toHtml (InlineNonLink s) = toHtml s
-    toHtml (InlineFootnoteRef f) = toHtml f
-
-instance ToHtml FootnoteRef where
-    toHtml (FootnoteRef identifier) = withTag "sup" ("<a href=\"" ++ "#footnote-" ++ identifier ++ "\">[" ++ "0" ++ "]</a>")
 
 instance ToHtml LinkContents where
-    toHtml (LCItalics i) = toHtml i
-    toHtml (LCBold b) = toHtml b
-    toHtml (LCCode c) = toHtml c
-    toHtml (LCHtml h) = toHtml h
-    toHtml (Plaintext s) = s
-
-instance ToHtml Italics where
     toHtml (Italics s) = withTag "i" s
-
-instance ToHtml Bold where
     toHtml (Bold s) = withTag "b" s
-
-instance ToHtml Code where
     toHtml (Code s) = withTag "code" s
+    toHtml (FootnoteRef identifier) = withTag "sup" ("<a href=\"" ++ "#footnote-" ++ identifier ++ "\">[" ++ "0" ++ "]</a>")
+    toHtml (Plaintext s) = s
+    toHtml (Html' h) = toHtml h
 
 instance ToHtml Link where
     toHtml l = "<a href=\"" ++ href l ++ "\">" ++ toHtml (text l) ++ "</a>"

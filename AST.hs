@@ -18,32 +18,20 @@ data Line = Line [Inline]
 
 data Inline = InlineLink Link
             | InlineNonLink LinkContents
-            | InlineFootnoteRef FootnoteRef
     deriving (Show)
 
-data LinkContents = LCItalics Italics
-                  | LCBold Bold
-                  | LCCode Code
-                  | LCHtml Html
+data LinkContents = Italics String
+                  | Bold String
+                  | Code String
+                  | FootnoteRef String
                   | Plaintext String
-    deriving (Show)
-
-data Italics = Italics String
-    deriving (Show)
-
-data Bold = Bold String
-    deriving (Show)
-
-data Code = Code String
+                  | Html' Html
     deriving (Show)
 
 data Link = Link {
     text :: LinkContents,
     href :: String
 }
-    deriving (Show)
-
-data FootnoteRef = FootnoteRef String
     deriving (Show)
 
 data HtmlTagType = Open | Close | SelfClosing

@@ -46,14 +46,28 @@ attr = do
 attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many1 $ noneOf "\"")
 
-bold :: Parser Bold
-bold = try $ fmap Bold $ between (string "**") (string "**") $ many1 $ noneOf specials
+bold :: Parser LinkContents
+bold = fmap Bold $ try $ between (string "**") (string "**") $ many1 $ noneOf specials
 
-italics :: Parser Italics
+italics :: Parser LinkContents
 italics = fmap Italics $ between (char '*') (char '*') $ many1 $ noneOf specials
 
-code :: Parser Code
+code :: Parser LinkContents
 code = fmap Code $ between (char '`') (char '`') $ many1 $ noneOf "`"
+
+footnoteRef :: Parser LinkContents
+footnoteRef = do
+    char '^'
+    identifier <- between (char '[') (char ']') $ many1 alphaNum
+    return $ FootnoteRef identifier
+
+linkcontents :: Parser LinkContents
+linkcontents = choice [bold,
+                       italics,
+                       code,
+                       footnoteRef,
+                       fmap Html' html,
+                       fmap Plaintext (many1 $ noneOf ('\n' : specials))]
 
 link :: Parser Link
 link = do
@@ -61,29 +75,8 @@ link = do
     href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf (')' : specials))
     return $ Link {text=text, href=href}
 
-linkcontents :: Parser LinkContents
-linkcontents = choice [fmap LCBold bold,
-                       fmap LCItalics italics,
-                       fmap LCCode code,
-                       fmap LCHtml html,
-                       fmap Plaintext (many1 $ noneOf ('\n' : specials))]
-
-footnoteRef :: Parser FootnoteRef
-footnoteRef = do
-    char '^'
-    identifier <- between (char '[') (char ']') $ many1 alphaNum
-    return $ FootnoteRef identifier
-
-footnoteDef :: Parser Block
-footnoteDef = do
-    char '~'
-    identifier <- between (char '[') (char ']') $ many1 alphaNum
-    many $ oneOf " \t"
-    content <- many1 line
-    return $ FootnoteDef identifier content
-
 inline :: Parser Inline
-inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents <|> fmap InlineFootnoteRef footnoteRef
+inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents
 
 line :: Parser Line
 line = do
@@ -125,6 +118,14 @@ blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
     char '\t' <|> (string "    " >> return '\t')
     many $ oneOf " \t"
     many $ noneOf "\n"
+
+footnoteDef :: Parser Block
+footnoteDef = do
+    char '~'
+    identifier <- between (char '[') (char ']') $ many1 alphaNum
+    many $ oneOf " \t"
+    content <- many1 line
+    return $ FootnoteDef identifier content
 
 block :: Parser Block
 block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
