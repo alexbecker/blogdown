@@ -1,11 +1,8 @@
 module Render where
 
-import Control.Monad
 import Control.Monad.State.Lazy
 import Data.List
 import qualified Data.Map as M
-import Data.Maybe
-import Text.Parsec.Char
 
 import AST
 
