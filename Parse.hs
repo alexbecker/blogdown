@@ -85,32 +85,35 @@ line = do
         then fail "line cannot begin with a space or tab"
         else fmap Line $ many1 inline
 
+lines1 :: Parser [Line]
+lines1 = sepEndBy1 line (char '\n' <|> (eof >> return '\n'))
+
 paragraph :: Parser Block
 paragraph = do
-    ls <- sepEndBy1 line (char '\n' <|> (eof >> return '\n'))
+    ls <- lines1
     many $ char '\n'
     return $ Paragraph ls
 
 header :: Parser Block
 header = do
     hashes <- many1 $ char '#'
-    many1 $ char ' '
+    many1 $ oneOf " \t"
     text <- line
     many $ char '\n'
     return $ Header (length hashes) text
 
 unorderedList :: Parser Block
 unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ try $ do
-    many $ char ' '
+    many1 $ oneOf " \t"
     char '*'
-    many $ oneOf " \t"
+    many1 $ oneOf " \t"
     line
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ flip sepEndBy1 (char '\n') $ try $ do
-    many $ char ' '
-    char '>'
     many $ oneOf " \t"
+    char '>'
+    many1 $ oneOf " \t"
     line
 
 blockCode :: Parser Block
@@ -123,8 +126,8 @@ footnoteDef :: Parser Block
 footnoteDef = do
     char '~'
     identifier <- between (char '[') (char ']') $ many1 alphaNum
-    many $ oneOf " \t"
-    content <- many1 line
+    many1 $ oneOf " \t"
+    content <- lines1
     return $ FootnoteDef identifier content
 
 block :: Parser Block

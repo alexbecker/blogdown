@@ -7,8 +7,12 @@ don't **you** know?
 # Google
 [Google](https://google.com)
 
-### small heading
+### small heading *with italics*
 new paragraph
+
+<div>let's have some <span style="font-weight: 900">inline</span>
+html that spans multiple lines<br/>
+</div>
 
 single `line`
  * this one
@@ -24,7 +28,9 @@ single `line`
 what kind of^[footnote]
 and a^[second]
 
-~[footnote] this kind
+~[footnote] this kind of footnote
+can have multiple lines
+
 ~[second] this too
 
 eof
