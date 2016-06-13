@@ -11,6 +11,7 @@ data Block = Paragraph [Line]
            | BlockQuote [Line]
            | BlockCode [String]
            | FootnoteDef String [Line]
+           | BlockHtml Html
     deriving (Show)
 
 data Line = Line [Inline]
@@ -25,7 +26,7 @@ data LinkContents = Italics String
                   | Code String
                   | FootnoteRef String
                   | Plaintext String
-                  | Html' Html
+                  | InlineHtml Html
     deriving (Show)
 
 data Link = Link {

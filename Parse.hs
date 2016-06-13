@@ -66,7 +66,7 @@ linkcontents = choice [bold,
                        italics,
                        code,
                        footnoteRef,
-                       fmap Html' html,
+                       fmap InlineHtml html,
                        fmap Plaintext (many1 $ noneOf ('\n' : specials))]
 
 link :: Parser Link
@@ -131,7 +131,7 @@ footnoteDef = do
     return $ FootnoteDef identifier content
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
+block = (many $ char '\n') >> choice [fmap BlockHtml html, paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
 
 ast :: Parser AST
 ast = fmap AST $ many block

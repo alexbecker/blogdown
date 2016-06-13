@@ -38,6 +38,7 @@ instance ToHtml Block where
     toHtml (BlockQuote ls) = fmap (withTag "blockquote" . fancyUnlines) $ mapM toHtml ls
     toHtml (BlockCode s) = return $ withTag "pre" $ withTag "code" $ unlines s
     toHtml (FootnoteDef identifier ls) = fmap (withTagAttrs "p" [("id", "footnote-" ++ identifier)] . fancyUnlines) $ mapM toHtml ls
+    toHtml (BlockHtml h) = toHtml h
 
 instance ToHtml Line where
     toHtml (Line is) = fmap concat $ mapM toHtml is
@@ -56,7 +57,7 @@ instance ToHtml LinkContents where
         put $ RenderState {footnotes=M.insert identifier newId fs}
         return $ withTag "sup" $ withTagAttrs "a" [("href", "#footnote-" ++ identifier)] ("[" ++ show newId ++ "]")
     toHtml (Plaintext s) = return s
-    toHtml (Html' h) = toHtml h
+    toHtml (InlineHtml h) = toHtml h
 
 instance ToHtml Link where
     toHtml l = fmap (withTagAttrs "a" [("href", href l)]) $ toHtml (text l)
