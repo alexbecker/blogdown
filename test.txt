@@ -22,7 +22,9 @@ single `line`
 
 
 what kind of^[footnote]
+and a^[second]
 
 ~[footnote] this kind
+~[second] this too
 
 eof
