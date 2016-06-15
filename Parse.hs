@@ -71,7 +71,7 @@ linkcontents = choice [bold,
 
 link :: Parser Link
 link = do
-    text <- between (char '[') (char ']') linkcontents
+    text <- between (char '[') (char ']') $ many1 linkcontents
     href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf (')' : specials))
     return $ Link {text=text, href=href}
 

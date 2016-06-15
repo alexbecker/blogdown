@@ -13,7 +13,7 @@ data RenderState = RenderState {
 class ToHtml a where
     toHtml :: a -> State RenderState String
 
-render :: AST -> String
+render :: (ToHtml a) => a -> String
 render a = fst $ runState (toHtml a) RenderState{footnotes = M.fromList []}
 
 instance ToHtml AST where
@@ -60,7 +60,7 @@ instance ToHtml LinkContents where
     toHtml (InlineHtml h) = toHtml h
 
 instance ToHtml Link where
-    toHtml l = fmap (withTagAttrs "a" [("href", href l)]) $ toHtml (text l)
+    toHtml l = fmap (withTagAttrs "a" [("href", href l)] . concat) $ mapM toHtml (text l)
 
 showAttr :: Attr -> String
 showAttr (Attr s t) = s ++ if (t /= "") then "=\"" ++ t ++ "\"" else ""

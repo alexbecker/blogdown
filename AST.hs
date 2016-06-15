@@ -30,7 +30,7 @@ data LinkContents = Italics String
     deriving (Show)
 
 data Link = Link {
-    text :: LinkContents,
+    text :: [LinkContents],
     href :: String
 }
     deriving (Show)
