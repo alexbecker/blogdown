@@ -63,7 +63,7 @@ instance ToHtml Link where
     toHtml l = fmap (withTagAttrs "a" [("href", href l)] . concat) $ mapM toHtml (text l)
 
 showAttr :: Attr -> String
-showAttr (Attr s t) = s ++ if (t /= "") then "=\"" ++ t ++ "\"" else ""
+showAttr (Attr s t) = s ++ "=\"" ++ t ++ "\""
 
 showInnerTag :: HtmlTag -> String
 showInnerTag t = unwords (tagname t : (map showAttr $ attrs t))

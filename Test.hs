@@ -23,14 +23,19 @@ printExpectedSuccess name input expected parsed = if output == expected
 
 expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO ()
 expectSuccess name p input expected = either
-    ((const (putStrLn $ "FAIL: " ++ name) >> putStrLn) . show)
+    ((flip const (putStrLn $ "FAIL: " ++ name) >> putStrLn) . show)
     (printExpectedSuccess name input expected)
     $ parse p name input
 
 testItalics = expectSuccess "italics" italics "*abc*" "<i>abc</i>"
 testBold = expectSuccess "bold" bold "**abc**" "<b>abc</b>"
 testCode = expectSuccess "code" code "`abc`" "<code>abc</code>"
-testInlineHtml = expectSuccess "inline html" html "<abbr>SQL</abbr>" "<abbr>SQL</abbr>"
+testInlineHtml = expectSuccess "inline html" html
+    "<abbr title=\"\">SQL</abbr>"
+    "<abbr title=\"\">SQL</abbr>"
+testFootnoteRef = expectSuccess "footnote reference" footnoteRef
+    "^[x]"
+    "<sup><a href=\"#footnote-x\">[0]</a></sup>"
 testLink = expectSuccess "link" link
     "[Google](https://google.com)"
     "<a href=\"https://google.com\">Google</a>"
@@ -62,6 +67,59 @@ testBlockCode = expectSuccess "block code" blockCode
     \    alert(x);\n"
     "<pre><code>var x = 0;\n\
     \alert(x);\n</code></pre>"
+testFootnoteDef = expectSuccess "footnote definition" footnoteDef
+    "~[x] This is a paragraph\n\
+    \of footnote.\n"
+    "<p id=\"footnote-x\">This is a paragraph\n\
+    \of footnote.</p>"
+testBlockHtml = expectSuccess "block html" blockHtml
+    "<div class=\"class\">\n\
+    \    <span></span>\n\
+    \</div>"
+    "<div class=\"class\">\n\
+    \    <span></span>\n\
+    \</div>"
+testAST = expectSuccess "whole AST" ast
+    "# hello\n\
+    \This is a paragraph\n\
+    \of text.\n\
+    \\n\
+    \Now *with* some^[x] `styling`\n\
+    \**behind** [it](https://google.com)\n\
+    \ * point 1\n\
+    \ * point 2\n\
+    \ > The politician said that\n\
+    \ > he would fix the economy.\n\
+    \    var x = 0;\n\
+    \    alert(x);\n\
+    \~[x] This is a paragraph\n\
+    \of footnote.\n\
+    \\n\
+    \This is a paragraph.\n\
+    \There are many like it but this one is mine.\n\
+    \<div class=\"class\">\n\
+    \    <span>foo</span>\n\
+    \</div>"
+    "<h1>hello</h1>\n\
+    \<p>This is a paragraph\n\
+    \of text.</p>\n\
+    \<p>Now <i>with</i> some<sup><a href=\"#footnote-x\">[0]</a></sup> <code>styling</code>\n\
+    \<b>behind</b> <a href=\"https://google.com\">it</a></p>\n\
+    \<ul><li>point 1</li>\n\
+    \<li>point 2</li>\n\
+    \</ul>\n\
+    \<blockquote>The politician said that\n\
+    \he would fix the economy.</blockquote>\n\
+    \<pre><code>var x = 0;\n\
+    \alert(x);\n\
+    \</code></pre>\n\
+    \<p id=\"footnote-x\">This is a paragraph\n\
+    \of footnote.</p>\n\
+    \<p>This is a paragraph.\n\
+    \There are many like it but this one is mine.\n\
+    \<div class=\"class\">\n\
+    \    <span>foo</span>\n\
+    \</div></p>\n"
 
 expectFailure :: String -> (Parser a) -> String -> [String] -> IO ()
 expectFailure name p input expected = either
@@ -77,6 +135,7 @@ main = do
     testBold
     testCode
     testInlineHtml
+    testFootnoteRef
     testLink
     testLinkWithContents
     testLine
@@ -86,4 +145,7 @@ main = do
     testUnorderedList
     testBlockQuote
     testBlockCode
+    testFootnoteDef
+    testBlockHtml
+    testAST
     testUnclosedTag

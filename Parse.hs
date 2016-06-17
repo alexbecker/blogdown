@@ -44,7 +44,7 @@ attr = do
     return $ Attr name val
 
 attrVal :: Parser String
-attrVal = between (char '"') (char '"') (many1 $ noneOf "\"")
+attrVal = between (char '"') (char '"') (many $ noneOf "\"")
 
 bold :: Parser LinkContents
 bold = fmap Bold $ try $ between (string "**") (string "**") $ many1 $ noneOf specials
@@ -130,8 +130,11 @@ footnoteDef = do
     content <- lines1
     return $ FootnoteDef identifier content
 
+blockHtml :: Parser Block
+blockHtml = fmap BlockHtml html
+
 block :: Parser Block
-block = (many $ char '\n') >> choice [fmap BlockHtml html, paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
+block = (many $ char '\n') >> choice [blockHtml, paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
 
 ast :: Parser AST
 ast = fmap AST $ many block
