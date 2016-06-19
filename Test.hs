@@ -29,6 +29,7 @@ expectSuccess name p input expected = either
 
 testItalics = expectSuccess "italics" italics "*abc*" "<i>abc</i>"
 testBold = expectSuccess "bold" bold "**abc**" "<b>abc</b>"
+testBoldItalics = expectSuccess "bold italics" bold "***abc***" "<b><i>abc</i></b>"
 testCode = expectSuccess "code" code "`abc`" "<code>abc</code>"
 testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
@@ -121,18 +122,21 @@ testAST = expectSuccess "whole AST" ast
     \    <span>foo</span>\n\
     \</div></p>\n"
 
-expectFailure :: String -> (Parser a) -> String -> [String] -> IO ()
-expectFailure name p input expected = either
+expectFailure :: String -> (Parser a) -> String -> IO ()
+expectFailure name p input = either
     (const $ putStrLn $ "PASS: " ++ name)
     (const $ putStrLn $ "FAIL: " ++ name)
     $ parse p name input
 
-testUnclosedTag = expectFailure "unclosed tag should fail to parse" html "<p>hello" []
+testNestedBold = expectFailure "bold tags cannot be nested" bold "****abc****"
+testNestedLink = expectFailure "links cannot be nested" link "[[a](https://a.com)](https://b.com)"
+testUnclosedTag = expectFailure "unclosed tag should fail to parse" html "<p>hello"
 
 main :: IO ()
 main = do
     testItalics
     testBold
+    testBoldItalics
     testCode
     testInlineHtml
     testFootnoteRef
@@ -148,4 +152,6 @@ main = do
     testFootnoteDef
     testBlockHtml
     testAST
+    testNestedBold
+    testNestedLink
     testUnclosedTag

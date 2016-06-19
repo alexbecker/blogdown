@@ -46,37 +46,45 @@ attr = do
 attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many $ noneOf "\"")
 
-bold :: Parser LinkContents
-bold = fmap Bold $ try $ between (string "**") (string "**") $ many1 $ noneOf specials
+bold :: Parser Inline
+bold = fmap Bold $ try $ between (string "**") (string "**") $ inlineExcept bold
 
-italics :: Parser LinkContents
-italics = fmap Italics $ between (char '*') (char '*') $ many1 $ noneOf specials
+italics :: Parser Inline
+italics = fmap Italics $ between (char '*') (char '*') $ inlineExcept italics
 
-code :: Parser LinkContents
+code :: Parser Inline
 code = fmap Code $ between (char '`') (char '`') $ many1 $ noneOf "`"
 
-footnoteRef :: Parser LinkContents
+footnoteRef :: Parser Inline
 footnoteRef = do
     char '^'
     identifier <- between (char '[') (char ']') $ many1 alphaNum
     return $ FootnoteRef identifier
 
-linkcontents :: Parser LinkContents
-linkcontents = choice [bold,
-                       italics,
-                       code,
-                       footnoteRef,
-                       fmap InlineHtml html,
-                       fmap Plaintext (many1 $ noneOf ('\n' : specials))]
-
 link :: Parser Link
 link = do
-    text <- between (char '[') (char ']') $ many1 linkcontents
+    text <- between (char '[') (char ']') $ many1 $ inlineExcept inlineLink
     href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf (')' : specials))
     return $ Link {text=text, href=href}
 
+inlineLink :: Parser Inline
+inlineLink = fmap InlineLink link
+
 inline :: Parser Inline
-inline = fmap InlineLink link <|> fmap InlineNonLink linkcontents
+inline = choice [bold,
+                 italics,
+                 code,
+                 footnoteRef,
+                 fmap InlineHtml html,
+                 fmap InlineLink link,
+                 fmap Plaintext (many1 $ noneOf ('\n' : specials))]
+
+inlineExcept :: Parser Inline -> Parser Inline
+inlineExcept p = do
+    illegalParse <- optionMaybe p
+    if isJust illegalParse
+        then fail "cannot nest inline markup"
+        else inline
 
 line :: Parser Line
 line = do

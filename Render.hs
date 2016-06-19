@@ -44,12 +44,8 @@ instance ToHtml Line where
     toHtml (Line is) = fmap concat $ mapM toHtml is
 
 instance ToHtml Inline where
-    toHtml (InlineLink l) = toHtml l
-    toHtml (InlineNonLink s) = toHtml s
-
-instance ToHtml LinkContents where
-    toHtml (Italics s) = return $ withTag "i" s
-    toHtml (Bold s) = return $ withTag "b" s
+    toHtml (Italics i) = toHtml i >>= (return . withTag "i")
+    toHtml (Bold i) = toHtml i >>= (return . withTag "b")
     toHtml (Code s) = return $ withTag "code" s
     toHtml (FootnoteRef identifier) = do
         fs <- gets footnotes
@@ -58,6 +54,7 @@ instance ToHtml LinkContents where
         return $ withTag "sup" $ withTagAttrs "a" [("href", "#footnote-" ++ identifier)] ("[" ++ show newId ++ "]")
     toHtml (Plaintext s) = return s
     toHtml (InlineHtml h) = toHtml h
+    toHtml (InlineLink l) = toHtml l
 
 instance ToHtml Link where
     toHtml l = fmap (withTagAttrs "a" [("href", href l)] . concat) $ mapM toHtml (text l)

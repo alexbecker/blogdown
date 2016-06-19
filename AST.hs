@@ -17,20 +17,17 @@ data Block = Paragraph [Line]
 data Line = Line [Inline]
     deriving (Show)
 
-data Inline = InlineLink Link
-            | InlineNonLink LinkContents
-    deriving (Show)
-
-data LinkContents = Italics String
-                  | Bold String
-                  | Code String
-                  | FootnoteRef String
-                  | Plaintext String
-                  | InlineHtml Html
+data Inline = Italics Inline
+            | Bold Inline
+            | Code String
+            | FootnoteRef String
+            | Plaintext String
+            | InlineHtml Html
+            | InlineLink Link
     deriving (Show)
 
 data Link = Link {
-    text :: [LinkContents],
+    text :: [Inline],
     href :: String
 }
     deriving (Show)
