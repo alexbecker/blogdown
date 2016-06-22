@@ -43,6 +43,6 @@ data HtmlTag = HtmlTag {
 data Attr = Attr String String
     deriving (Show)
 
-data Html = PairTag HtmlTag [Either String Html] HtmlTag
+data Html = PairTag HtmlTag [Either String Html]
           | SingleTag HtmlTag
     deriving (Show)

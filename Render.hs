@@ -70,7 +70,7 @@ showHtmlContent (Left s) = s
 showHtmlContent (Right h) = showHtml h
 
 showHtml :: Html -> String
-showHtml (PairTag open content close) = "<" ++ showInnerTag open ++ ">" ++ concatMap showHtmlContent content ++ "</" ++ showInnerTag close ++ ">"
+showHtml (PairTag open content) = "<" ++ showInnerTag open ++ ">" ++ concatMap showHtmlContent content ++ "</" ++ tagname open ++ ">"
 showHtml (SingleTag tag) = "<" ++ showInnerTag tag ++ "/>"
 
 instance ToHtml Html where

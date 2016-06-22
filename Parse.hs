@@ -28,7 +28,9 @@ pairTag = do
     open <- htmlTag Open
     content <- option [] $ many $ try htmlContent
     close <- htmlTag Close
-    return $ PairTag open content close
+    if tagname open /= tagname close
+        then fail $ "mismatched tags: '" ++ tagname open ++ "' and '" ++ tagname close ++ "'"
+        else return $ PairTag open content
 
 singleTag :: Parser Html
 singleTag = fmap SingleTag $ htmlTag SelfClosing

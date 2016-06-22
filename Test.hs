@@ -131,6 +131,7 @@ expectFailure name p input = either
 testNestedBold = expectFailure "bold tags cannot be nested" bold "****abc****"
 testNestedLink = expectFailure "links cannot be nested" link "[[a](https://a.com)](https://b.com)"
 testUnclosedTag = expectFailure "unclosed tag should fail to parse" html "<p>hello"
+testMismatchedTags = expectFailure "mismatched tags should fail to parse" html "<a>hello</b>"
 
 main :: IO ()
 main = do
@@ -155,3 +156,4 @@ main = do
     testNestedBold
     testNestedLink
     testUnclosedTag
+    testMismatchedTags
