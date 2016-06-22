@@ -64,7 +64,7 @@ footnoteRef = do
 link :: Parser Link
 link = do
     text <- between (char '[') (char ']') $ many1 $ inlineExcept inlineLink
-    href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf (')' : specials))
+    href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf "\n)")
     return $ Link {text=text, href=href}
 
 inlineLink :: Parser Inline
