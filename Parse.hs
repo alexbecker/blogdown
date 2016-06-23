@@ -132,7 +132,7 @@ blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
     many $ oneOf " \t"
     many $ noneOf "\n"
 
-footnoteDef :: Parser Block
+footnoteDef :: Parser FootnoteDef
 footnoteDef = do
     char '~'
     identifier <- between (char '[') (char ']') $ many1 alphaNum
@@ -140,11 +140,14 @@ footnoteDef = do
     content <- lines1
     return $ FootnoteDef identifier content
 
+footnoteDefs :: Parser Block
+footnoteDefs = fmap FootnoteDefs $ many1 footnoteDef
+
 blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, paragraph, header, unorderedList, blockQuote, blockCode, footnoteDef]
+block = (many $ char '\n') >> choice [footnoteDefs, blockHtml, paragraph, header, unorderedList, blockQuote, blockCode]
 
 ast :: Parser AST
 ast = fmap AST $ many block

@@ -40,8 +40,11 @@ instance ToHtml Block where
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (fmap (withTag "li") . toHtml r) ls
     toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . fancyUnlines) $ mapM (toHtml r) ls
     toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ unlines s
-    toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "p" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
+    toHtml r (FootnoteDefs fs) = fmap (withTag "ol" . fancyUnlines) $ mapM (toHtml r) fs
     toHtml r (BlockHtml h) = toHtml r h
+
+instance ToHtml FootnoteDef where
+    toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
 
 instance ToHtml Line where
     toHtml r (Line is) = fmap concat $ mapM (toHtml r) is

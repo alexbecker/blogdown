@@ -10,8 +10,11 @@ data Block = Paragraph [Line]
            | UnorderedList [Line]
            | BlockQuote [Line]
            | BlockCode [String]
-           | FootnoteDef String [Line]
+           | FootnoteDefs [FootnoteDef]
            | BlockHtml Html
+    deriving (Show)
+
+data FootnoteDef = FootnoteDef String [Line]
     deriving (Show)
 
 data Line = Line [Inline]

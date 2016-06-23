@@ -70,10 +70,10 @@ testBlockCode = expectSuccess "block code" blockCode
     "<pre><code>var x = 0;\n\
     \alert(x);\n</code></pre>"
 testFootnoteDef = expectSuccess "footnote definition" footnoteDef
-    "~[x] This is a paragraph\n\
+    "~[x] This is a single list item\n\
     \of footnote.\n"
-    "<p id=\"-footnote-x\">This is a paragraph\n\
-    \of footnote.</p>"
+    "<li id=\"-footnote-x\">This is a single list item\n\
+    \of footnote.</li>"
 testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
     \    <span></span>\n\
@@ -115,8 +115,8 @@ testAST = expectSuccess "whole AST" ast
     \<pre><code>var x = 0;\n\
     \alert(x);\n\
     \</code></pre>\n\
-    \<p id=\"-footnote-x\">This is a paragraph\n\
-    \of footnote.</p>\n\
+    \<ol><li id=\"-footnote-x\">This is a paragraph\n\
+    \of footnote.</li></ol>\n\
     \<p>This is a paragraph.\n\
     \There are many like it but this one is mine.\n\
     \<div class=\"class\">\n\
