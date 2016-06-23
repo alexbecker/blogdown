@@ -6,6 +6,7 @@ import Text.Parsec.Error
 
 import Parse
 import Render
+import RenderOptions
 
 printExpectedSuccess :: (ToHtml a) => String -> String -> String -> a -> IO ()
 printExpectedSuccess name input expected parsed = if output == expected
@@ -19,7 +20,7 @@ printExpectedSuccess name input expected parsed = if output == expected
         putStrLn "expect:"
         putStrLn expected
     where
-        output = render parsed
+        output = render defaultRenderOptions parsed
 
 expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO ()
 expectSuccess name p input expected = either
@@ -36,7 +37,7 @@ testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
 testFootnoteRef = expectSuccess "footnote reference" footnoteRef
     "^[x]"
-    "<sup><a href=\"#footnote-x\">[0]</a></sup>"
+    "<sup><a href=\"#-footnote-x\">[0]</a></sup>"
 testLink = expectSuccess "link" link
     "[Google](https://google.com)"
     "<a href=\"https://google.com\">Google</a>"
@@ -71,7 +72,7 @@ testBlockCode = expectSuccess "block code" blockCode
 testFootnoteDef = expectSuccess "footnote definition" footnoteDef
     "~[x] This is a paragraph\n\
     \of footnote.\n"
-    "<p id=\"footnote-x\">This is a paragraph\n\
+    "<p id=\"-footnote-x\">This is a paragraph\n\
     \of footnote.</p>"
 testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
@@ -104,7 +105,7 @@ testAST = expectSuccess "whole AST" ast
     "<h1>hello</h1>\n\
     \<p>This is a paragraph\n\
     \of text.</p>\n\
-    \<p>Now <i>with</i> some<sup><a href=\"#footnote-x\">[0]</a></sup> <code>styling</code>\n\
+    \<p>Now <i>with</i> some<sup><a href=\"#-footnote-x\">[0]</a></sup> <code>styling</code>\n\
     \<b>behind</b> <a href=\"https://google.com\">it</a></p>\n\
     \<ul><li>point 1</li>\n\
     \<li>point 2</li>\n\
@@ -114,7 +115,7 @@ testAST = expectSuccess "whole AST" ast
     \<pre><code>var x = 0;\n\
     \alert(x);\n\
     \</code></pre>\n\
-    \<p id=\"footnote-x\">This is a paragraph\n\
+    \<p id=\"-footnote-x\">This is a paragraph\n\
     \of footnote.</p>\n\
     \<p>This is a paragraph.\n\
     \There are many like it but this one is mine.\n\
