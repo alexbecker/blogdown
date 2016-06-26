@@ -68,7 +68,20 @@ testBlockCode = expectSuccess "block code" blockCode
     "    var x = 0;\n\
     \    alert(x);\n"
     "<pre><code>var x = 0;\n\
-    \alert(x);\n</code></pre>"
+    \alert(x);\n\
+    \</code></pre>"
+testBlockCodeWhitespace = expectSuccess "block code handles starting whitespace correctly" blockCode
+    "    def f(x):\n\
+    \        return x\n"
+    "<pre><code>def f(x):\n\
+    \    return x\n\
+    \</code></pre>"
+testBlockCodeSpecialChars = expectSuccess "any line beginning with four spaces should be ablock of code, regardless of the first non-whitespace character" block
+    "    > print(1)\n\
+    \    * 1"
+    "<pre><code>> print(1)\n\
+    \* 1\n\
+    \</code></pre>"
 testFootnoteDef = expectSuccess "footnote definition" footnoteDef
     "~[x] This is a single list item\n\
     \of footnote.\n"
@@ -152,6 +165,8 @@ main = do
     testUnorderedList
     testBlockQuote
     testBlockCode
+    testBlockCodeWhitespace
+    testBlockCodeSpecialChars
     testFootnoteDef
     testBlockHtml
     testAST

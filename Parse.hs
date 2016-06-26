@@ -114,22 +114,19 @@ header = do
 
 unorderedList :: Parser Block
 unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ try $ do
-    many1 $ oneOf " \t"
-    char '*'
+    string " *"
     many1 $ oneOf " \t"
     line
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ flip sepEndBy1 (char '\n') $ try $ do
-    many $ oneOf " \t"
-    char '>'
+    string " >"
     many1 $ oneOf " \t"
     line
 
 blockCode :: Parser Block
 blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
     char '\t' <|> (string "    " >> return '\t')
-    many $ oneOf " \t"
     many $ noneOf "\n"
 
 footnoteDef :: Parser FootnoteDef
