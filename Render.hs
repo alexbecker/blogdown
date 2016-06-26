@@ -38,6 +38,12 @@ withTagAttrs tag attrs content = "<" ++ tag ++ " " ++ showAttrs attrs ++ ">" ++ 
 fancyUnlines :: [String] -> String
 fancyUnlines = concat . intersperse "\n"
 
+escapeHtml :: String -> String
+escapeHtml = concatMap escapeChar where
+    escapeChar '<' = "&lt;"
+    escapeChar '>' = "&gt;"
+    escapeChar c = [c]
+
 instance ToHtml FootnoteDefs where
     toHtml r (FootnoteDefs fs) = fmap ((++ "\n") . withTag "ol" . unlines) $ mapM (toHtml r) fs
 
@@ -49,7 +55,7 @@ instance ToHtml Block where
     toHtml r (Header level text) = fmap (withTag ("h" ++ show level )) $ toHtml r text
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (fmap (withTag "li") . toHtml r) ls
     toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . fancyUnlines) $ mapM (toHtml r) ls
-    toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ unlines s
+    toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ escapeHtml $ unlines s
     toHtml r (BlockHtml h) = toHtml r h
 
 instance ToHtml Line where
@@ -58,7 +64,7 @@ instance ToHtml Line where
 instance ToHtml Inline where
     toHtml r (Italics i) = toHtml r i >>= (return . withTag "i")
     toHtml r (Bold i) = toHtml r i >>= (return . withTag "b")
-    toHtml _ (Code s) = return $ withTag "code" s
+    toHtml _ (Code s) = return $ withTag "code" $ escapeHtml s
     toHtml r (FootnoteRef identifier) = do
         fs <- gets footnotes
         let newId = M.size fs

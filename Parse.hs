@@ -120,7 +120,7 @@ unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ try $ do
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ flip sepEndBy1 (char '\n') $ try $ do
-    string " >"
+    char '>'
     many1 $ oneOf " \t"
     line
 

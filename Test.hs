@@ -60,8 +60,8 @@ testUnorderedList = expectSuccess "ul" unorderedList
     "<ul><li>point 1</li>\n\
     \<li>point 2</li>\n</ul>"
 testBlockQuote = expectSuccess "blockquote" blockQuote
-    " > The politician said that\n\
-    \ > he would fix the economy.\n"
+    "> The politician said that\n\
+    \> he would fix the economy.\n"
     "<blockquote>The politician said that\n\
     \he would fix the economy.</blockquote>"
 testBlockCode = expectSuccess "block code" blockCode
@@ -79,7 +79,7 @@ testBlockCodeWhitespace = expectSuccess "block code handles starting whitespace 
 testBlockCodeSpecialChars = expectSuccess "any line beginning with four spaces should be ablock of code, regardless of the first non-whitespace character" block
     "    > print(1)\n\
     \    * 1"
-    "<pre><code>> print(1)\n\
+    "<pre><code>&gt; print(1)\n\
     \* 1\n\
     \</code></pre>"
 testFootnoteDef = expectSuccess "footnote definition" footnoteDef
@@ -103,8 +103,8 @@ testAST = expectSuccess "whole AST" ast
     \**behind** [it](https://google.com)\n\
     \ * point 1\n\
     \ * point 2\n\
-    \ > The politician said that\n\
-    \ > he would fix the economy.\n\
+    \> The politician said that\n\
+    \> he would fix the economy.\n\
     \    var x = 0;\n\
     \    alert(x);\n\
     \\n\
