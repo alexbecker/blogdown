@@ -137,17 +137,20 @@ footnoteDef = do
     char '~'
     identifier <- between (char '[') (char ']') $ many1 alphaNum
     many1 $ oneOf " \t"
-    content <- lines1
+    content <- many1 block
     return $ FootnoteDef identifier content
 
-footnoteDefs :: Parser Block
+footnoteDefs :: Parser FootnoteDefs
 footnoteDefs = fmap FootnoteDefs $ many1 footnoteDef
 
 blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [footnoteDefs, blockHtml, paragraph, header, unorderedList, blockQuote, blockCode]
+block = (many $ char '\n') >> choice [blockHtml, paragraph, header, unorderedList, blockQuote, blockCode]
 
 ast :: Parser AST
-ast = fmap AST $ many block
+ast = do
+    blocks <- many block
+    footnotes <- optionMaybe footnoteDefs
+    return $ AST blocks footnotes

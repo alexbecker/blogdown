@@ -72,8 +72,8 @@ testBlockCode = expectSuccess "block code" blockCode
 testFootnoteDef = expectSuccess "footnote definition" footnoteDef
     "~[x] This is a single list item\n\
     \of footnote.\n"
-    "<li id=\"-footnote-x\">This is a single list item\n\
-    \of footnote.</li>"
+    "<li id=\"-footnote-x\"><p>This is a single list item\n\
+    \of footnote.</p></li>"
 testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
     \    <span></span>\n\
@@ -94,14 +94,14 @@ testAST = expectSuccess "whole AST" ast
     \ > he would fix the economy.\n\
     \    var x = 0;\n\
     \    alert(x);\n\
-    \~[x] This is a paragraph\n\
-    \of footnote.\n\
     \\n\
     \This is a paragraph.\n\
     \There are many like it but this one is mine.\n\
     \<div class=\"class\">\n\
     \    <span>foo</span>\n\
-    \</div>"
+    \</div>\n\
+    \~[x] This is a paragraph\n\
+    \of footnote.\n"
     "<h1>hello</h1>\n\
     \<p>This is a paragraph\n\
     \of text.</p>\n\
@@ -115,13 +115,14 @@ testAST = expectSuccess "whole AST" ast
     \<pre><code>var x = 0;\n\
     \alert(x);\n\
     \</code></pre>\n\
-    \<ol><li id=\"-footnote-x\">This is a paragraph\n\
-    \of footnote.</li></ol>\n\
     \<p>This is a paragraph.\n\
     \There are many like it but this one is mine.\n\
     \<div class=\"class\">\n\
     \    <span>foo</span>\n\
-    \</div></p>\n"
+    \</div></p>\n\
+    \<ol><li id=\"-footnote-x\"><p>This is a paragraph\n\
+    \of footnote.</p></li>\n\
+    \</ol>\n"
 
 expectFailure :: String -> (Parser a) -> String -> IO ()
 expectFailure name p input = either

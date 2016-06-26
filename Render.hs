@@ -20,7 +20,11 @@ render :: (ToHtml a) => RenderOptions -> a -> String
 render r a = fst $ runState (toHtml r a) initialState
 
 instance ToHtml AST where
-    toHtml r (AST bs) = fmap unlines $ mapM (toHtml r) bs
+    toHtml r (AST bs Nothing) = fmap unlines $ mapM (toHtml r) bs
+    toHtml r (AST bs (Just f)) = do
+        blocks <- mapM (toHtml r) bs
+        footnotes <- toHtml r f
+        return $ unlines blocks ++ footnotes
 
 withTag :: String -> String -> String
 withTag tag content = "<" ++ tag ++ ">" ++ content ++ "</" ++ tag ++ ">"
@@ -34,17 +38,19 @@ withTagAttrs tag attrs content = "<" ++ tag ++ " " ++ showAttrs attrs ++ ">" ++ 
 fancyUnlines :: [String] -> String
 fancyUnlines = concat . intersperse "\n"
 
+instance ToHtml FootnoteDefs where
+    toHtml r (FootnoteDefs fs) = fmap ((++ "\n") . withTag "ol" . unlines) $ mapM (toHtml r) fs
+
+instance ToHtml FootnoteDef where
+    toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
+
 instance ToHtml Block where
     toHtml r (Paragraph ls) = fmap (withTag "p" . fancyUnlines) $ mapM (toHtml r) ls
     toHtml r (Header level text) = fmap (withTag ("h" ++ show level )) $ toHtml r text
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (fmap (withTag "li") . toHtml r) ls
     toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . fancyUnlines) $ mapM (toHtml r) ls
     toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ unlines s
-    toHtml r (FootnoteDefs fs) = fmap (withTag "ol" . fancyUnlines) $ mapM (toHtml r) fs
     toHtml r (BlockHtml h) = toHtml r h
-
-instance ToHtml FootnoteDef where
-    toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
 
 instance ToHtml Line where
     toHtml r (Line is) = fmap concat $ mapM (toHtml r) is

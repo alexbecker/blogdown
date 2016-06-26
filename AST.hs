@@ -2,7 +2,13 @@ module AST where
 
 import Text.Parsec hiding (Line)
 
-data AST = AST [Block]
+data AST = AST [Block] (Maybe FootnoteDefs)
+    deriving (Show)
+
+data FootnoteDefs = FootnoteDefs [FootnoteDef]
+    deriving (Show)
+
+data FootnoteDef = FootnoteDef String [Block]
     deriving (Show)
 
 data Block = Paragraph [Line]
@@ -10,11 +16,7 @@ data Block = Paragraph [Line]
            | UnorderedList [Line]
            | BlockQuote [Line]
            | BlockCode [String]
-           | FootnoteDefs [FootnoteDef]
            | BlockHtml Html
-    deriving (Show)
-
-data FootnoteDef = FootnoteDef String [Line]
     deriving (Show)
 
 data Line = Line [Inline]
