@@ -8,7 +8,10 @@ data AST = AST [Block] (Maybe FootnoteDefs)
 data FootnoteDefs = FootnoteDefs [FootnoteDef]
     deriving (Show)
 
-data FootnoteDef = FootnoteDef String [Block]
+data FootnoteDef = FootnoteDef {
+    identifier :: String,
+    content :: [Block]
+}
     deriving (Show)
 
 data Block = Paragraph [Line]

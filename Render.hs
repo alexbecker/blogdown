@@ -2,7 +2,8 @@ module Render where
 
 import Control.Monad.State.Lazy
 import Data.List
-import qualified Data.Map as M
+import Data.Maybe
+import qualified Data.Map.Strict as M
 
 import AST
 import RenderOptions
@@ -24,7 +25,7 @@ instance ToHtml AST where
     toHtml r (AST bs (Just f)) = do
         blocks <- mapM (toHtml r) bs
         footnotes <- toHtml r f
-        return $ unlines blocks ++ footnotes
+        return $ unlines blocks ++ footnotes ++ "\n"
 
 withTag :: String -> String -> String
 withTag tag content = "<" ++ tag ++ ">" ++ content ++ "</" ++ tag ++ ">"
@@ -45,14 +46,17 @@ escapeHtml = concatMap escapeChar where
     escapeChar c = [c]
 
 instance ToHtml FootnoteDefs where
-    toHtml r (FootnoteDefs fs) = fmap ((++ "\n") . withTag "ol" . unlines) $ mapM (toHtml r) fs
+    toHtml r (FootnoteDefs fs) = do
+        mapping <- gets footnotes
+        let fs' = sortOn (fromJust . flip M.lookup mapping . identifier) fs
+        fmap (withTag "ol" . unlines) $ mapM (toHtml r) fs'
 
 instance ToHtml FootnoteDef where
     toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
 
 instance ToHtml Block where
     toHtml r (Paragraph ls) = fmap (withTag "p" . fancyUnlines) $ mapM (toHtml r) ls
-    toHtml r (Header level text) = fmap (withTag ("h" ++ show level )) $ toHtml r text
+    toHtml r (Header level text) = fmap (withTag ("h" ++ show level)) $ toHtml r text
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (fmap (withTag "li") . toHtml r) ls
     toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . fancyUnlines) $ mapM (toHtml r) ls
     toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ escapeHtml $ unlines s
