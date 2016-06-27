@@ -94,6 +94,14 @@ testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
     \    <span></span>\n\
     \</div>"
+testFootnoteOrdering = expectSuccess "footnotes should be sorted by first reference" ast
+    "^[0]^[1]\n\
+    \~[1] b\n\
+    \~[0] a\n"
+    "<p><sup><a href=\"#-footnote-0\">[0]</a></sup><sup><a href=\"#-footnote-1\">[1]</a></sup></p>\n\
+    \<ol><li id=\"-footnote-0\"><p>a</p></li>\n\
+    \<li id=\"-footnote-1\"><p>b</p></li>\n\
+    \</ol>\n"
 testAST = expectSuccess "whole AST" ast
     "# hello\n\
     \This is a paragraph\n\
@@ -169,6 +177,7 @@ main = do
     testBlockCodeSpecialChars
     testFootnoteDef
     testBlockHtml
+    testFootnoteOrdering
     testAST
     testNestedBold
     testNestedLink
