@@ -49,7 +49,7 @@ instance ToHtml FootnoteDefs where
     toHtml r (FootnoteDefs fs) = do
         mapping <- gets footnotes
         let fs' = sortOn (fromJust . flip M.lookup mapping . identifier) fs
-        fmap (withTag "ol" . unlines) $ mapM (toHtml r) fs'
+        fmap (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r)] . unlines) $ mapM (toHtml r) fs'
 
 instance ToHtml FootnoteDef where
     toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
