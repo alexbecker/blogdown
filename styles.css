@@ -1,0 +1,7 @@
+ol.footnotes > li {
+    margin: 15px 0;
+}
+
+ol.footnotes > li > p:nth-child(2) {
+    display: inline;
+}

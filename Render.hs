@@ -49,10 +49,13 @@ instance ToHtml FootnoteDefs where
     toHtml r (FootnoteDefs fs) = do
         mapping <- gets footnotes
         let fs' = sortOn (fromJust . flip M.lookup mapping . identifier) fs
-        fmap (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r)] . unlines) $ mapM (toHtml r) fs'
+        fmap (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r), ("class", "footnotes")] . unlines) $ mapM (toHtml r) fs'
 
 instance ToHtml FootnoteDef where
-    toHtml r (FootnoteDef identifier ls) = fmap (withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] . fancyUnlines) $ mapM (toHtml r) ls
+    toHtml r (FootnoteDef identifier ls) = do
+    content <- mapM (toHtml r) ls
+    let content' = withTagAttrs "a" [("href", "#a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)] "^" ++ "\n" ++ fancyUnlines content
+    return $ withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] content'
 
 instance ToHtml Block where
     toHtml r (Paragraph ls) = fmap (withTag "p" . fancyUnlines) $ mapM (toHtml r) ls
@@ -73,7 +76,10 @@ instance ToHtml Inline where
         fs <- gets footnotes
         let newId = M.size fs
         put $ RenderState {footnotes=M.insert identifier newId fs}
-        return $ withTag "sup" $ withTagAttrs "a" [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)] ("[" ++ show newId ++ "]")
+        return $ withTag "sup" $ withTagAttrs "a"
+            [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier),
+             ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)]
+            ("[" ++ show newId ++ "]")
     toHtml _ (Plaintext s) = return s
     toHtml r (InlineHtml h) = toHtml r h
     toHtml r (InlineLink l) = toHtml r l
