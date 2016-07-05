@@ -37,7 +37,7 @@ testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
 testFootnoteRef = expectSuccess "footnote reference" footnoteRef
     "^[x]"
-    "<sup><a href=\"#-footnote-x\">[0]</a></sup>"
+    "<sup><a href=\"#-footnote-x\" id=\"a--footnote-x\">[0]</a></sup>"
 testLink = expectSuccess "link" link
     "[Google](https://google.com)"
     "<a href=\"https://google.com\">Google</a>"
@@ -98,8 +98,8 @@ testFootnoteOrdering = expectSuccess "footnotes should be sorted by first refere
     "^[0]^[1]\n\
     \~[1] b\n\
     \~[0] a\n"
-    "<p><sup><a href=\"#-footnote-0\">[0]</a></sup><sup><a href=\"#-footnote-1\">[1]</a></sup></p>\n\
-    \<ol><li id=\"-footnote-0\"><p>a</p></li>\n\
+    "<p><sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup><sup><a href=\"#-footnote-1\" id=\"a--footnote-1\">[1]</a></sup></p>\n\
+    \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>a</p></li>\n\
     \<li id=\"-footnote-1\"><p>b</p></li>\n\
     \</ol>\n"
 testAST = expectSuccess "whole AST" ast
@@ -126,7 +126,7 @@ testAST = expectSuccess "whole AST" ast
     "<h1>hello</h1>\n\
     \<p>This is a paragraph\n\
     \of text.</p>\n\
-    \<p>Now <i>with</i> some<sup><a href=\"#-footnote-x\">[0]</a></sup> <code>styling</code>\n\
+    \<p>Now <i>with</i> some<sup><a href=\"#-footnote-x\" id=\"a--footnote-x\">[0]</a></sup> <code>styling</code>\n\
     \<b>behind</b> <a href=\"https://google.com\">it</a></p>\n\
     \<ul><li>point 1</li>\n\
     \<li>point 2</li>\n\
@@ -141,7 +141,7 @@ testAST = expectSuccess "whole AST" ast
     \<div class=\"class\">\n\
     \    <span>foo</span>\n\
     \</div></p>\n\
-    \<ol><li id=\"-footnote-x\"><p>This is a paragraph\n\
+    \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-x\"><p>This is a paragraph\n\
     \of footnote.</p></li>\n\
     \</ol>\n"
 
