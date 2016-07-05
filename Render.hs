@@ -54,7 +54,9 @@ instance ToHtml FootnoteDefs where
 instance ToHtml FootnoteDef where
     toHtml r (FootnoteDef identifier ls) = do
     content <- mapM (toHtml r) ls
-    let content' = withTagAttrs "a" [("href", "#a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)] "^" ++ "\n" ++ fancyUnlines content
+    let content' = if footnoteBacklinks r
+        then withTagAttrs "a" [("href", "#a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)] "^" ++ "\n" ++ fancyUnlines content
+        else fancyUnlines content
     return $ withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] content'
 
 instance ToHtml Block where
@@ -75,11 +77,14 @@ instance ToHtml Inline where
     toHtml r (FootnoteRef identifier) = do
         fs <- gets footnotes
         let newId = M.size fs
-        put $ RenderState {footnotes=M.insert identifier newId fs}
-        return $ withTag "sup" $ withTagAttrs "a"
-            [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier),
-             ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)]
-            ("[" ++ show newId ++ "]")
+        if isJust (M.lookup identifier fs)
+            then fail $ "repeated footnote identifier: " ++ identifier
+            else do
+                put $ RenderState {footnotes=M.insert identifier newId fs}
+                return $ withTag "sup" $ withTagAttrs "a"
+                    [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier),
+                     ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)]
+                    ("[" ++ show newId ++ "]")
     toHtml _ (Plaintext s) = return s
     toHtml r (InlineHtml h) = toHtml r h
     toHtml r (InlineLink l) = toHtml r l
