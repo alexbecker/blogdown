@@ -12,4 +12,4 @@ main = do
     renderOptions <- getRenderOptions
     input <- getContents
     let result = parse ast "test" input
-    putStr $ either (\_ -> "") (render renderOptions) result
+    putStr $ either show (render renderOptions) result
