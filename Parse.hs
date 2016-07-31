@@ -60,7 +60,7 @@ code = fmap Code $ between (char '`') (char '`') $ many1 $ noneOf "`"
 footnoteRef :: Parser Inline
 footnoteRef = do
     char '^'
-    identifier <- between (char '[') (char ']') $ many1 alphaNum
+    identifier <- between (char '[') (char ']') $ many1 $ noneOf "[]"
     return $ FootnoteRef identifier
 
 link :: Parser Link
@@ -132,7 +132,7 @@ blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
 footnoteDef :: Parser FootnoteDef
 footnoteDef = do
     char '~'
-    identifier <- between (char '[') (char ']') $ many1 alphaNum
+    identifier <- between (char '[') (char ']') $ many1 $ noneOf "[]"
     many1 $ oneOf " \t"
     content <- many1 block
     return $ FootnoteDef identifier content
