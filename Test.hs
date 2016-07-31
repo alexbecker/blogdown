@@ -49,6 +49,8 @@ testLine = expectSuccess "line" line
     "hi <i>there</i> <b>bob</b>"
 testH1 = expectSuccess "h1" header "# hello" "<h1>hello</h1>"
 testH6 = expectSuccess "h6" header "###### hello" "<h6>hello</h6>"
+testHardRule = expectSuccess "hard rule" hardRule "---\n" "<hr/>"
+testHardRuleLong = expectSuccess "hard rule with extra dashes" hardRule "----\n" "<hr/>"
 testParagraph = expectSuccess "paragraph" paragraph
     "This is a paragraph\n\
     \of text.\n"
@@ -121,6 +123,8 @@ testAST = expectSuccess "whole AST" ast
     \<div class=\"class\">\n\
     \    <span>foo</span>\n\
     \</div>\n\
+    \\n\
+    \---\n\
     \~[x] This is a paragraph\n\
     \of footnote.\n"
     "<h1>hello</h1>\n\
@@ -141,6 +145,7 @@ testAST = expectSuccess "whole AST" ast
     \<div class=\"class\">\n\
     \    <span>foo</span>\n\
     \</div></p>\n\
+    \<hr/>\n\
     \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-x\"><p>This is a paragraph\n\
     \of footnote.</p></li>\n\
     \</ol>\n"
@@ -169,6 +174,8 @@ main = do
     testLine
     testH1
     testH6
+    testHardRule
+    testHardRuleLong
     testParagraph
     testUnorderedList
     testBlockQuote

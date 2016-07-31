@@ -98,6 +98,9 @@ line = do
 lines1 :: Parser [Line]
 lines1 = sepEndBy1 line (char '\n' <|> (eof >> return '\n'))
 
+hardRule :: Parser Block
+hardRule = try (string "---") >> many (char '-') >> many1 (char '\n') >> return HardRule
+
 paragraph :: Parser Block
 paragraph = do
     ls <- lines1
@@ -144,7 +147,7 @@ blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, paragraph, header, unorderedList, blockQuote, blockCode]
+block = (many $ char '\n') >> choice [blockHtml, hardRule, paragraph, header, unorderedList, blockQuote, blockCode]
 
 ast :: Parser AST
 ast = do

@@ -14,7 +14,8 @@ data FootnoteDef = FootnoteDef {
 }
     deriving (Show)
 
-data Block = Paragraph [Line]
+data Block = HardRule
+           | Paragraph [Line]
            | Header Int Line
            | UnorderedList [Line]
            | BlockQuote [Line]

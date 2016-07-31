@@ -62,6 +62,7 @@ instance ToHtml FootnoteDef where
     return $ withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] content'
 
 instance ToHtml Block where
+    toHtml _ HardRule = return "<hr/>"
     toHtml r (Paragraph ls) = fmap (withTag "p" . fancyUnlines) $ mapM (toHtml r) ls
     toHtml r (Header level text) = fmap (withTag ("h" ++ show level)) $ toHtml r text
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (fmap (withTag "li") . toHtml r) ls
