@@ -91,9 +91,12 @@ inlineExcept p = do
 line :: Parser Line
 line = do
     startingSpace <- optionMaybe $ lookAhead $ oneOf " \t"
+    startingHardRule <- optionMaybe $ lookAhead $ hardRule
     if isJust startingSpace
         then fail "line cannot begin with a space or tab"
-        else fmap Line $ many1 inline
+        else if isJust startingHardRule
+            then fail "line cannot begin with \"---\""
+            else fmap Line $ many1 inline
 
 lines1 :: Parser [Line]
 lines1 = sepEndBy1 line (char '\n' <|> (eof >> return '\n'))

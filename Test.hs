@@ -123,7 +123,6 @@ testAST = expectSuccess "whole AST" ast
     \<div class=\"class\">\n\
     \    <span>foo</span>\n\
     \</div>\n\
-    \\n\
     \---\n\
     \~[x] This is a paragraph\n\
     \of footnote.\n"
