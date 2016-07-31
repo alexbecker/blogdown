@@ -47,9 +47,11 @@ escapeHtml = concatMap escapeChar where
 
 instance ToHtml FootnoteDefs where
     toHtml r (FootnoteDefs fs) = do
+        fsRendered <- mapM (toHtml r) fs
         mapping <- gets footnotes
-        let fs' = sortOn (fromJust . flip M.lookup mapping . identifier) fs
-        fmap (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r), ("class", "footnotes")] . unlines) $ mapM (toHtml r) fs'
+        let permutation = sortOn (fromJust . flip M.lookup mapping . identifier . (fs !!)) [0 .. length fs - 1]
+        let fsSorted = map (fsRendered !!) permutation
+        return $ (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r), ("class", "footnotes")] . unlines) fsSorted
 
 instance ToHtml FootnoteDef where
     toHtml r (FootnoteDef identifier ls) = do
