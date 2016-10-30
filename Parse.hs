@@ -8,7 +8,7 @@ import AST
 
 type Parser = Parsec String ()
 
-specials = "*#`^~<>[]"
+specials = "*`^~<>[]"
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -150,7 +150,7 @@ blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, hardRule, paragraph, header, unorderedList, blockQuote, blockCode]
+block = (many $ char '\n') >> choice [blockHtml, hardRule, header, paragraph, unorderedList, blockQuote, blockCode]
 
 ast :: Parser AST
 ast = do

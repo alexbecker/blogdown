@@ -56,6 +56,11 @@ testParagraph = expectSuccess "paragraph" paragraph
     \of text.\n"
     "<p>This is a paragraph\n\
     \of text.</p>"
+testHashInParagraph = expectSuccess "paragraph containing literal '#'" paragraph
+    "This is a paragraph\n\
+    \containing '#'\n"
+    "<p>This is a paragraph\n\
+    \containing '#'</p>"
 testUnorderedList = expectSuccess "ul" unorderedList
     " * point 1\n\
     \ * point 2\n"
@@ -173,6 +178,7 @@ main = do
     testLine
     testH1
     testH6
+    testHashInParagraph
     testHardRule
     testHardRuleLong
     testParagraph
