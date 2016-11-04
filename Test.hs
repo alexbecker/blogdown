@@ -56,6 +56,9 @@ testParagraph = expectSuccess "paragraph" paragraph
     \of text.\n"
     "<p>This is a paragraph\n\
     \of text.</p>"
+testEscapeCharacters = expectSuccess "paragraph with escaped special characters" paragraph
+    "These are special: \\~, \\*, \\[, \\], \\(, \\)\n"
+    "<p>These are special: ~, *, [, ], (, )</p>"
 testHashInParagraph = expectSuccess "paragraph containing literal '#'" paragraph
     "This is a paragraph\n\
     \containing '#'\n"
@@ -178,10 +181,11 @@ main = do
     testLine
     testH1
     testH6
-    testHashInParagraph
     testHardRule
     testHardRuleLong
     testParagraph
+    testEscapeCharacters
+    testHashInParagraph
     testUnorderedList
     testBlockQuote
     testBlockCode
