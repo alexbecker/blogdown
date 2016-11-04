@@ -8,7 +8,18 @@ import AST
 
 type Parser = Parsec String ()
 
-specials = "*`^~<>[]"
+specials = "*`^<>[]"
+firstCharSpecials = " \t#~"
+
+special :: Char -> Parser Char
+special c = lookAhead (noneOf "\\") >> char c
+
+nonSpecial :: Parser Char
+nonSpecial = do
+    escape <- optionMaybe $ char '\\'
+    if isJust escape
+        then anyChar
+        else noneOf ('\n' : specials)
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -49,24 +60,24 @@ attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many $ noneOf "\"")
 
 bold :: Parser Inline
-bold = fmap Bold $ try $ between (string "**") (string "**") $ inlineExcept bold
+bold = fmap Bold $ try $ between (special '*' >> char '*') (string "**") $ inlineExcept bold
 
 italics :: Parser Inline
-italics = fmap Italics $ between (char '*') (char '*') $ inlineExcept italics
+italics = fmap Italics $ between (special '*') (special '*') $ inlineExcept italics
 
 code :: Parser Inline
-code = fmap Code $ between (char '`') (char '`') $ many1 $ noneOf "`"
+code = fmap Code $ between (special '`') (special '`') $ many1 $ noneOf "`"
 
 footnoteRef :: Parser Inline
 footnoteRef = do
     char '^'
-    identifier <- between (char '[') (char ']') $ many1 $ noneOf "[]"
+    identifier <- between (special '[') (special ']') $ many1 $ noneOf "[]"
     return $ FootnoteRef identifier
 
 link :: Parser Link
 link = do
-    text <- between (char '[') (char ']') $ many1 $ inlineExcept inlineLink
-    href <- between (char '(') (char ')') $ many ((string "\\)" >> return ')') <|> noneOf "\n)")
+    text <- between (special '[') (special ']') $ many1 $ inlineExcept inlineLink
+    href <- between (special '(') (special ')') $ many ((string "\\)" >> return ')') <|> noneOf "\n)")
     return $ Link {text=text, href=href}
 
 inlineLink :: Parser Inline
@@ -78,8 +89,8 @@ inline = choice [bold,
                  code,
                  footnoteRef,
                  fmap InlineHtml html,
-                 fmap InlineLink link,
-                 fmap Plaintext (many1 $ noneOf ('\n' : specials))]
+                 inlineLink,
+                 fmap Plaintext (many1 nonSpecial)]
 
 inlineExcept :: Parser Inline -> Parser Inline
 inlineExcept p = do
@@ -90,10 +101,10 @@ inlineExcept p = do
 
 line :: Parser Line
 line = do
-    startingSpace <- optionMaybe $ lookAhead $ oneOf " \t"
+    startingSpecial <- optionMaybe $ lookAhead $ oneOf firstCharSpecials
     startingHardRule <- optionMaybe $ lookAhead $ hardRule
-    if isJust startingSpace
-        then fail "line cannot begin with a space or tab"
+    if isJust startingSpecial
+        then fail ("line cannot begin with " ++ [fromJust startingSpecial])
         else if isJust startingHardRule
             then fail "line cannot begin with \"---\""
             else fmap Line $ many1 inline
@@ -150,7 +161,7 @@ blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, hardRule, header, paragraph, unorderedList, blockQuote, blockCode]
+block = (many $ char '\n') >> choice [blockHtml, hardRule, header, unorderedList, blockQuote, blockCode, paragraph]
 
 ast :: Parser AST
 ast = do
