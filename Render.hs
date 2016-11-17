@@ -77,7 +77,7 @@ instance ToHtml Block where
     toHtml r (BlockHtml h) = toHtml r h
 
 instance ToHtml UnorderedListItem where
-    toHtml r (UnorderedListItem ls) = fmap (withTag "li" . stripEndingNewline . fancyUnlines) $ mapM (toHtml r) ls
+    toHtml r (UnorderedListItem ls) = fmap (withTag "li" . stripEndingNewline . concat) $ mapM (toHtml r) ls
 
 instance ToHtml Inline where
     toHtml r (Italics ls) = fmap (withTag "i" . concat) $ mapM (toHtml r) ls
