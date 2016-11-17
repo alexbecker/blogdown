@@ -14,28 +14,25 @@ data FootnoteDef = FootnoteDef {
 }
     deriving (Show)
 
+data UnorderedListItem = UnorderedListItem [Inline]
+    deriving (Show)
+
 data Block = HardRule
-           | Paragraph [Line]
-           | Header Int Line
-           | UnorderedList [Line]
-           | BlockQuote [Line]
+           | Paragraph [Inline]
+           | Header Int [Inline]
+           | UnorderedList [UnorderedListItem]
+           | BlockQuote [Inline]
            | BlockCode [String]
            | BlockHtml Html
     deriving (Show)
 
-data Line = Line [Inline]
-    deriving (Show)
-
-data Inline = Italics Inline
-            | Bold Inline
+data Inline = Italics [Inline]
+            | Bold [Inline]
             | Code String
             | FootnoteRef String
             | Plaintext String
             | InlineHtml Html
-            | InlineLink Link
-    deriving (Show)
-
-data Link = Link {
+            | Link {
     text :: [Inline],
     href :: String
 }

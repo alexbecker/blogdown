@@ -26,27 +26,24 @@ expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO ()
 expectSuccess name p input expected = either
     ((flip const (putStrLn $ "FAIL: " ++ name) >> putStrLn) . show)
     (printExpectedSuccess name input expected)
-    $ parse p name input
+    $ runParser p Parse.initialState name input
 
-testItalics = expectSuccess "italics" italics "*abc*" "<i>abc</i>"
-testBold = expectSuccess "bold" bold "**abc**" "<b>abc</b>"
-testBoldItalics = expectSuccess "bold italics" bold "***abc***" "<b><i>abc</i></b>"
-testCode = expectSuccess "code" code "`abc`" "<code>abc</code>"
+testItalics = expectSuccess "italics" inline "*abc*" "<i>abc</i>"
+testBold = expectSuccess "bold" inline "**abc**" "<b>abc</b>"
+testBoldItalics = expectSuccess "bold italics" inline "***abc***" "<b><i>abc</i></b>"
+testCode = expectSuccess "code" inline "`abc`" "<code>abc</code>"
 testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
     "<abbr title=\"\">SQL</abbr>"
 testFootnoteRef = expectSuccess "footnote reference" footnoteRef
     "^[x]"
     "<sup><a href=\"#-footnote-x\" id=\"a--footnote-x\">[0]</a></sup>"
-testLink = expectSuccess "link" link
+testLink = expectSuccess "link" inline
     "[Google](https://google.com)"
     "<a href=\"https://google.com\">Google</a>"
-testLinkWithContents = expectSuccess "link with styling inside" link
+testLinkWithContents = expectSuccess "link with styling inside" inline
     "[*Whence* `he` **came**](https://google.com)"
     "<a href=\"https://google.com\"><i>Whence</i> <code>he</code> <b>came</b></a>"
-testLine = expectSuccess "line" line
-    "hi *there* **bob**"
-    "hi <i>there</i> <b>bob</b>"
 testH1 = expectSuccess "h1" header "# hello" "<h1>hello</h1>"
 testH6 = expectSuccess "h6" header "###### hello" "<h6>hello</h6>"
 testHardRule = expectSuccess "hard rule" hardRule "---\n" "<hr/>"
@@ -86,7 +83,7 @@ testBlockCodeWhitespace = expectSuccess "block code handles starting whitespace 
     "<pre><code>def f(x):\n\
     \    return x\n\
     \</code></pre>"
-testBlockCodeSpecialChars = expectSuccess "any line beginning with four spaces should be ablock of code, regardless of the first non-whitespace character" block
+testBlockCodeSpecialChars = expectSuccess "any line beginning with four spaces should be a block of code, regardless of the first non-whitespace character" block
     "    > print(1)\n\
     \    * 1"
     "<pre><code>&gt; print(1)\n\
@@ -114,6 +111,7 @@ testFootnoteOrdering = expectSuccess "footnotes should be sorted by first refere
     \</ol>\n"
 testAST = expectSuccess "whole AST" ast
     "# hello\n\
+    \\n\
     \This is a paragraph\n\
     \of text.\n\
     \\n\
@@ -161,10 +159,10 @@ expectFailure :: String -> (Parser a) -> String -> IO ()
 expectFailure name p input = either
     (const $ putStrLn $ "PASS: " ++ name)
     (const $ putStrLn $ "FAIL: " ++ name)
-    $ parse p name input
+    $ runParser p Parse.initialState name input
 
-testNestedBold = expectFailure "bold tags cannot be nested" bold "****abc****"
-testNestedLink = expectFailure "links cannot be nested" link "[[a](https://a.com)](https://b.com)"
+testNestedBold = expectFailure "bold tags cannot be nested" inline "****abc****"
+testNestedLink = expectFailure "links cannot be nested" inline "[[a](https://a.com)](https://b.com)"
 testUnclosedTag = expectFailure "unclosed tag should fail to parse" html "<p>hello"
 testMismatchedTags = expectFailure "mismatched tags should fail to parse" html "<a>hello</b>"
 
@@ -178,7 +176,6 @@ main = do
     testFootnoteRef
     testLink
     testLinkWithContents
-    testLine
     testH1
     testH6
     testHardRule

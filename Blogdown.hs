@@ -11,5 +11,5 @@ main :: IO ()
 main = do
     renderOptions <- getRenderOptions
     input <- getContents
-    let result = parse ast "test" input
+    let result = runParser ast Parse.initialState "test" input
     putStr $ either show (render renderOptions) result

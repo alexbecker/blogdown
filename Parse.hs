@@ -1,25 +1,55 @@
 module Parse where
 
+import Data.List
 import Data.Maybe
-import Text.Parsec hiding (Line)
+import Text.Parsec
 import Text.Parsec.Char
 
 import AST
 
-type Parser = Parsec String ()
+data ParserState = ParserState {
+    prevCharIsNewline :: Bool,
+    inBlockQuote :: Bool
+}
+type Parser = Parsec String ParserState
 
-specials = "*`^<>[]"
-firstCharSpecials = " \t#~"
+initialState = ParserState{
+    prevCharIsNewline=False,
+    inBlockQuote=False
+}
 
-special :: Char -> Parser Char
-special c = lookAhead (noneOf "\\") >> char c
+specials = "*`^<>[]\\"
+firstCharSpecials = " \t#~\n" ++ specials 
 
 nonSpecial :: Parser Char
 nonSpecial = do
+    state <- getState
     escape <- optionMaybe $ char '\\'
-    if isJust escape
+    c <- if isJust escape
         then anyChar
-        else noneOf ('\n' : specials)
+        else if prevCharIsNewline state
+            then if inBlockQuote state
+                then do
+                    char '>'
+                    many1 $ oneOf " \t"
+                    putState $ state {prevCharIsNewline=False}
+                    nonSpecial
+                else noneOf firstCharSpecials
+            else noneOf specials
+    putState $ state {prevCharIsNewline=(c == '\n')}
+    return c
+
+plaintext :: Parser String
+plaintext = many1 nonSpecial
+
+escapableNoneOf :: String -> Parser Char
+escapableNoneOf blacklist = do
+    escape <- optionMaybe $ char '\\'
+    c <- if isJust escape
+        then anyChar
+        else noneOf blacklist
+    modifyState (\s -> s {prevCharIsNewline=(c == '\n')})
+    return c
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
@@ -59,92 +89,86 @@ attr = do
 attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many $ noneOf "\"")
 
-bold :: Parser Inline
-bold = fmap Bold $ try $ between (special '*' >> char '*') (string "**") $ inlineExcept bold
+inlineParsers :: [String] -> [Parser Inline]
+inlineParsers parserNames = map snd $ filter (\(k,v) -> elem k parserNames)
+    [("bold", bold parserNames),
+     ("italics", italics parserNames),
+     ("code", code),
+     ("footnoteRef", footnoteRef),
+     ("link", link parserNames),
+     ("inlineHtml", fmap InlineHtml html),
+     ("plaintext", fmap Plaintext plaintext)]
 
-italics :: Parser Inline
-italics = fmap Italics $ between (special '*') (special '*') $ inlineExcept italics
+internalParser :: String -> [String] -> Parser [Inline]
+internalParser parentName parserNames = many1 $ choice $ inlineParsers $ delete parentName parserNames
+
+-- The bold and italics parsers are tricky because they both use the same special character.
+-- As a result, both need "try" so they do not step on each other.
+bold :: [String] -> Parser Inline
+bold parserNames = fmap Bold $ try $ between (string "**") (try $ string "**") $ internalParser "bold" parserNames
+
+italics :: [String] -> Parser Inline
+italics parserNames = fmap Italics $ try $ between (char '*') (char '*') $ internalParser "italics" parserNames
 
 code :: Parser Inline
-code = fmap Code $ between (special '`') (special '`') $ many1 $ noneOf "`"
+code = fmap Code $ between (char '`') (char '`') $ many1 $ escapableNoneOf "`"
 
 footnoteRef :: Parser Inline
 footnoteRef = do
     char '^'
-    identifier <- between (special '[') (special ']') $ many1 $ noneOf "[]"
+    identifier <- between (char '[') (char ']') $ many1 $ escapableNoneOf "[]"
     return $ FootnoteRef identifier
 
-link :: Parser Link
-link = do
-    text <- between (special '[') (special ']') $ many1 $ inlineExcept inlineLink
-    href <- between (special '(') (special ')') $ many ((string "\\)" >> return ')') <|> noneOf "\n)")
+link :: [String] -> Parser Inline
+link parserNames = do
+    text <- between (char '[') (char ']') $ internalParser "link" parserNames
+    href <- between (char '(') (char ')') $ many $ escapableNoneOf "()"
     return $ Link {text=text, href=href}
 
-inlineLink :: Parser Inline
-inlineLink = fmap InlineLink link
-
 inline :: Parser Inline
-inline = choice [bold,
-                 italics,
-                 code,
-                 footnoteRef,
-                 fmap InlineHtml html,
-                 inlineLink,
-                 fmap Plaintext (many1 nonSpecial)]
-
-inlineExcept :: Parser Inline -> Parser Inline
-inlineExcept p = do
-    illegalParse <- optionMaybe p
-    if isJust illegalParse
-        then fail "cannot nest inline markup"
-        else inline
-
-line :: Parser Line
-line = do
-    startingSpecial <- optionMaybe $ lookAhead $ oneOf firstCharSpecials
-    startingHardRule <- optionMaybe $ lookAhead $ hardRule
-    if isJust startingSpecial
-        then fail ("line cannot begin with " ++ [fromJust startingSpecial])
-        else if isJust startingHardRule
-            then fail "line cannot begin with \"---\""
-            else fmap Line $ many1 inline
-
-lines1 :: Parser [Line]
-lines1 = sepEndBy1 line (char '\n' <|> (eof >> return '\n'))
+inline = choice $ inlineParsers ["bold", "italics", "code", "footnoteRef", "link", "inlineHtml", "plaintext"]
 
 hardRule :: Parser Block
 hardRule = try (string "---") >> many (char '-') >> many1 (char '\n') >> return HardRule
 
 paragraph :: Parser Block
-paragraph = do
-    ls <- lines1
-    many $ char '\n'
-    return $ Paragraph ls
+paragraph = fmap Paragraph $ many1 $ inline
 
 header :: Parser Block
 header = do
     hashes <- many1 $ char '#'
     many1 $ oneOf " \t"
-    text <- line
-    many $ char '\n'
+    text <- many1 inline
     return $ Header (length hashes) text
 
-unorderedList :: Parser Block
-unorderedList = fmap UnorderedList $ flip sepEndBy1 (char '\n') $ try $ do
-    string " *"
+unorderedListItem :: Parser UnorderedListItem
+unorderedListItem = fmap UnorderedListItem $ do
+    try $ string " *"
     many1 $ oneOf " \t"
-    line
+    many1 $ inline
+
+unorderedList :: Parser Block
+unorderedList = fmap UnorderedList $ many1 unorderedListItem
 
 blockQuote :: Parser Block
-blockQuote = fmap BlockQuote $ flip sepEndBy1 (char '\n') $ try $ do
+blockQuote = fmap BlockQuote $ do
     char '>'
     many1 $ oneOf " \t"
-    line
+    modifyState (\s -> s {inBlockQuote=True, prevCharIsNewline=False})
+    content <- many1 inline
+    modifyState (\s -> s {inBlockQuote=False})
+    return content
 
 blockCode :: Parser Block
 blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
     char '\t' <|> (string "    " >> return '\t')
     many $ noneOf "\n"
+
+blockHtml :: Parser Block
+blockHtml = fmap BlockHtml html
+
+block :: Parser Block
+block = (many $ char '\n') >> choice [blockHtml, hardRule, header, unorderedList, blockQuote, blockCode, paragraph]
 
 footnoteDef :: Parser FootnoteDef
 footnoteDef = do
@@ -156,12 +180,6 @@ footnoteDef = do
 
 footnoteDefs :: Parser FootnoteDefs
 footnoteDefs = fmap FootnoteDefs $ many1 footnoteDef
-
-blockHtml :: Parser Block
-blockHtml = fmap BlockHtml html
-
-block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, hardRule, header, unorderedList, blockQuote, blockCode, paragraph]
 
 ast :: Parser AST
 ast = do

@@ -4,6 +4,7 @@ import Control.Monad.State.Lazy
 import Data.List
 import Data.Maybe
 import qualified Data.Map.Strict as M
+import qualified Data.Text as T
 
 import AST
 import RenderOptions
@@ -61,21 +62,26 @@ instance ToHtml FootnoteDef where
         else fancyUnlines content
     return $ withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] content'
 
+stripEndingNewline :: String -> String
+stripEndingNewline s = if last s == '\n'
+    then init s
+    else s
+
 instance ToHtml Block where
     toHtml _ HardRule = return "<hr/>"
-    toHtml r (Paragraph ls) = fmap (withTag "p" . fancyUnlines) $ mapM (toHtml r) ls
-    toHtml r (Header level text) = fmap (withTag ("h" ++ show level)) $ toHtml r text
-    toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (fmap (withTag "li") . toHtml r) ls
-    toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . fancyUnlines) $ mapM (toHtml r) ls
+    toHtml r (Paragraph ls) = fmap (withTag "p" . stripEndingNewline . concat) $ mapM (toHtml r) ls
+    toHtml r (Header level text) = fmap (withTag ("h" ++ show level) . stripEndingNewline . concat) $ mapM (toHtml r) text
+    toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (toHtml r) ls
+    toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . stripEndingNewline . concat) $ mapM (toHtml r) ls
     toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ escapeHtml $ unlines s
     toHtml r (BlockHtml h) = toHtml r h
 
-instance ToHtml Line where
-    toHtml r (Line is) = fmap concat $ mapM (toHtml r) is
+instance ToHtml UnorderedListItem where
+    toHtml r (UnorderedListItem ls) = fmap (withTag "li" . stripEndingNewline . fancyUnlines) $ mapM (toHtml r) ls
 
 instance ToHtml Inline where
-    toHtml r (Italics i) = toHtml r i >>= (return . withTag "i")
-    toHtml r (Bold i) = toHtml r i >>= (return . withTag "b")
+    toHtml r (Italics ls) = fmap (withTag "i" . concat) $ mapM (toHtml r) ls
+    toHtml r (Bold ls) = fmap (withTag "b" . concat) $ mapM (toHtml r) ls
     toHtml _ (Code s) = return $ withTag "code" $ escapeHtml s
     toHtml r (FootnoteRef identifier) = do
         fs <- gets footnotes
@@ -90,10 +96,7 @@ instance ToHtml Inline where
                     ("[" ++ show newId ++ "]")
     toHtml _ (Plaintext s) = return s
     toHtml r (InlineHtml h) = toHtml r h
-    toHtml r (InlineLink l) = toHtml r l
-
-instance ToHtml Link where
-    toHtml r l = fmap (withTagAttrs "a" [("href", href l)] . concat) $ mapM (toHtml r) $ text l
+    toHtml r (Link text href) = fmap (withTagAttrs "a" [("href", href)] . concat) $ mapM (toHtml r) $ text
 
 showAttr :: Attr -> String
 showAttr (Attr s t) = s ++ "=\"" ++ t ++ "\""
