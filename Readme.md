@@ -1,3 +1,6 @@
+*Note: If you are viewing this Readme on GitHub, its Blogdown-specific features will not render correctly.
+The Blogdown-formatted output is in Readme.html.*
+
 # Blogdown
 
 Blogdown is a markup language based on Markdown, designed for writing blog posts.
@@ -82,7 +85,7 @@ Note that the first un-indented line will start a new block.
  * **HTML Block**: An HTML tag at the beginning of a line starts an HTML block.
 Its contents must be valid HTML, and it is ended by the corresponding closing tag.
 HTML blocks are rendered verbatim, unless HTML bleaching is enabled.
- * **Hard Rule**: A line starting with "---" defines a hard rule. All trailing characters are ignored.
+ * **Hard Rule**: A line consisting of 3+ "-" defines a hard rule.
 
 #### Inline Nodes
 
@@ -116,4 +119,5 @@ A footnote definition is only terminated by another footnote definition or the e
 ---
 
 ~[underline-parser-complexity] Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.
+
 ~[footnote-numbering] Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the `--footnote-index-from` flag).

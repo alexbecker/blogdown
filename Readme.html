@@ -1,0 +1,97 @@
+<p><i>Note: If you are viewing this Readme on GitHub, its Blogdown-specific features will not render correctly.
+The Blogdown-formatted output is in Readme.html.</i></p>
+<h1>Blogdown</h1>
+<p>Blogdown is a markup language based on Markdown, designed for writing blog posts.
+Blogdown's goals are:</p>
+<ul><li>Clean syntax for common blog post features absent from Markdown.</li>
+<li>Simple, well-defined parsing rules.</li>
+<li>Ability to handle untrusted input.</li>
+<li>Handling line breaks gracefully.</li>
+<li>Compatibility with common Markdown implementations.</li>
+</ul>
+<p>Because there is no Markdown standard and existing Markdown implementations
+<a href="http://johnmacfarlane.net/babelmark2/?text=Hello+world%0A*+this+is+a+list%0A%3E+this+is+a+quote">disagree wildly even on simple cases</a>,
+Blogdown cannot be 100% compatible with even a majority of Markdown implementations.
+Given this, I decided it was worth it to make the syntax diverge slightly in exchange for consistency and simplicity.</p>
+<h2>Installation</h2>
+<p>Blogdown requires <a href="https://www.haskell.org/ghc/">GHC</a> and <a href="https://hackage.haskell.org/package/parsec">Parsec</a> to compile,
+both of which are available through common Linux package managers.
+Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the repository's base directory.</p>
+<h2>Usage</h2>
+<p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
+<pre><code>cat blogpost.md | ./Blogdown &gt; blogpost.html
+</code></pre>
+<h3>Optional Flags</h3>
+<p><code>Blogdown</code> accepts the following long-style flags:</p>
+<ul><li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
+<li><code>--footnote-index-from</code>: The index from which footnotes are numbered. Defaults to 0.</li>
+<li><code>--footnote-backlinks</code>: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.</li>
+</ul>
+<h2>Syntax</h2>
+<h3>Differences from Markdown</h3>
+<p>Most of the syntax of Blogdown should be familiar to Markdown users, but some new syntax has been added, and some existing syntax has changed.</p>
+<h4>New Features</h4>
+<p>Blogdown adds footnote support to Markdown.
+Footnotes can be referenced inline with ^[<i>footnote-name</i>], which will render as a superscript link to a <i>footnote-definition</i>
+at the end of the document, which is defined by ~[<i>footnote-name</i>] followed by the footnote contents.</p>
+<h4>Markdown Incompatibilities</h4>
+<p>Blogdown does not support the Markdown syntax of underlining text with '=' or '-' characters to define a header,
+as this comes at a large cost in the parser implementation<sup><a href="#-footnote-underline-parser-complexity" id="a--footnote-underline-parser-complexity">[0]</a></sup>.
+The '#' syntax for headers is supported instead.</p>
+<p>It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
+The "&lt;br/&gt;" tag is supported instead.</p>
+<p>The '~' and '^' characters are now special, and must be escaped to be used in text.</p>
+<h3>Formal Description</h3>
+<p>The body of a Blogdown document consists of a sequence of <i>block nodes</i>, which in turn consist of <i>inline nodes</i>.</p>
+<h4>Block Nodes</h4>
+<p>Block nodes can contain any sequence of inline nodes, with the exception of code and HTML blocks, whose contents are rendered verbatim.
+Block nodes can span multiple lines and are terminated by a blank line, the beginning of another type of block, or the end of the document.</p>
+<p>The following block node types are supported:</p>
+<ul><li><b>Paragraph</b>: The default block type; any content not in another block is part of a paragraph.
+Paragraphs must be separated by a blank line.
+Can contain arbitrary inline nodes.</li>
+<li><b>Header</b>: 1-6 '#' characters at the beginning of a line begins a header, with the number of '#' characters determining the header level.
+Can contain arbitrary inline nodes.</li>
+<li><b>Unordered Lists</b>: A " * " begins an unordered list item, which itself is a block.
+Sequential unordered list items form an unordered list.
+Can contain arbitrary inline nodes.</li>
+<li><b>Blockquote</b>: Lines beginning with "&gt; " define a blockquote.
+Can contain arbitrary inline nodes.
+Note that the first line not beginning with "&gt; " will start a new block.</li>
+<li><b>Code Block</b>: Lines indented with 4+ spaces or a tab define a code block.
+Code blocks are rendered verbatim, ignoring special characters.
+Note that the first un-indented line will start a new block.</li>
+<li><b>HTML Block</b>: An HTML tag at the beginning of a line starts an HTML block.
+Its contents must be valid HTML, and it is ended by the corresponding closing tag.
+HTML blocks are rendered verbatim, unless HTML bleaching is enabled.</li>
+<li><b>Hard Rule</b>: A line consisting of 3+ "-" defines a hard rule.</li>
+</ul>
+<h4>Inline Nodes</h4>
+<p>Inline nodes can generally contain a sequence of other inline nodes, but cannot contain nodes of the same type.
+Despite the name, inline nodes can span multiple lines, e.g. to accomodate line length limits.</p>
+<p>The following inline node types are supported:</p>
+<ul><li><b>Plaintext</b>: The default inline type; any text not in another inline node is plaintext. Rendered verbatim.</li>
+<li><b>Italic</b>: Surrounding text with "*" <i>italicizes</i> it. Italic nodes can contain any other type of inline node.</li>
+<li><b>Bold</b>: Surrounding text with "**" <b>bolds</b> it. Bold nodes can contain any other type of inline node.</li>
+<li><b>Code</b>: Surrounding text with "`" renders it as <code>code</code>. The content is rendered verbatim.</li>
+<li><b>Link</b>: A <a href="#">link</a> is written as "[<i>text</i>](<i>href</i>)". The <i>text</i> portion can contain any other type of inline node.
+The <i>href</i> portion is the link destination, and is parsed verbatim except that any literal "(" or ")" must be escaped.</li>
+<li><b>Footnote Reference</b>: Writing ^[<i>footnote-name</i>] defines a footnote reference.
+It is rendered as a superscript footnote number<sup><a href="#-footnote-footnote-numbering" id="a--footnote-footnote-numbering">[1]</a></sup>, and links to the footnote named <i>footnote-name</i>
+if it is present in the footer.</li>
+</ul>
+<h4>Footer</h4>
+<p>A Blogdown document may optionally include a footer after the body.
+The footer consists of a sequence of <i>footnote definitions</i>, each of which begins on a new line with ~[<i>footnote-name</i>] and consists of an arbitrary sequence of blocks.
+A footnote definition is only terminated by another footnote definition or the end of the document.</p>
+<h2>Planned improvements</h2>
+<ul><li>Ordered lists</li>
+<li>Tables</li>
+<li>Replacing "--" with &mdash;</li>
+<li>Better error messages on parse failures</li>
+<li>Windows support</li>
+</ul>
+<hr/>
+<ol start="0" class="footnotes"><li id="-footnote-underline-parser-complexity"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
+<li id="-footnote-footnote-numbering"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
+</ol>
