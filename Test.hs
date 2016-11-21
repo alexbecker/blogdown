@@ -54,8 +54,8 @@ testParagraph = expectSuccess "paragraph" paragraph
     "<p>This is a paragraph\n\
     \of text.</p>"
 testEscapeCharacters = expectSuccess "paragraph with escaped special characters" paragraph
-    "These are special: \\~, \\*, \\[, \\], \\(, \\)\n"
-    "<p>These are special: ~, *, [, ], (, )</p>"
+    "These are special: \\~, \\*, \\[, \\], \\^\n"
+    "<p>These are special: ~, *, [, ], ^</p>"
 testHashInParagraph = expectSuccess "paragraph containing literal '#'" paragraph
     "This is a paragraph\n\
     \containing '#'\n"
