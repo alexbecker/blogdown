@@ -89,11 +89,6 @@ testBlockCodeSpecialChars = expectSuccess "any line beginning with four spaces s
     "<pre><code>&gt; print(1)\n\
     \* 1\n\
     \</code></pre>"
-testFootnoteDef = expectSuccess "footnote definition" footnoteDef
-    "~[x] This is a single list item\n\
-    \of footnote.\n"
-    "<li id=\"-footnote-x\"><p>This is a single list item\n\
-    \of footnote.</p></li>"
 testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
     \    <span></span>\n\
@@ -101,6 +96,22 @@ testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
     \    <span></span>\n\
     \</div>"
+testFootnoteDef = expectSuccess "footnote definition" footnoteDef
+    "~[x] This is a single list item\n\
+    \of footnote.\n"
+    "<li id=\"-footnote-x\"><p>This is a single list item\n\
+    \of footnote.</p></li>"
+testFootnoteDefs = expectSuccess "multiple footnote definitions" ast
+    "^[0]^[1]^[2]\n\
+    \~[0] a\n\
+    \~[1] b\n\
+    \\n\
+    \~[2] c\n"
+    "<p><sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup><sup><a href=\"#-footnote-1\" id=\"a--footnote-1\">[1]</a></sup><sup><a href=\"#-footnote-2\" id=\"a--footnote-2\">[2]</a></sup></p>\n\
+    \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>a</p></li>\n\
+    \<li id=\"-footnote-1\"><p>b</p></li>\n\
+    \<li id=\"-footnote-2\"><p>c</p></li>\n\
+    \</ol>\n"
 testFootnoteOrdering = expectSuccess "footnotes should be sorted by first reference" ast
     "^[0]^[1]\n\
     \~[1] b\n\
@@ -188,8 +199,9 @@ main = do
     testBlockCode
     testBlockCodeWhitespace
     testBlockCodeSpecialChars
-    testFootnoteDef
     testBlockHtml
+    testFootnoteDef
+    testFootnoteDefs
     testFootnoteOrdering
     testAST
     testNestedBold

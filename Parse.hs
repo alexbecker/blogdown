@@ -19,7 +19,7 @@ initialState = ParserState{
 }
 
 specials = "*`^<>[]\\"
-firstCharSpecials = " \t#~\n" ++ specials 
+firstCharSpecials = " \t#~\n" ++ specials
 
 nonSpecial :: Parser Char
 nonSpecial = do
@@ -172,10 +172,12 @@ block = (many $ char '\n') >> choice [blockHtml, hardRule, header, unorderedList
 
 footnoteDef :: Parser FootnoteDef
 footnoteDef = do
+    many $ char '\n'
     char '~'
     identifier <- between (char '[') (char ']') $ many1 $ noneOf "[]"
     many1 $ oneOf " \t"
-    content <- many1 block
+    modifyState (\s -> s {prevCharIsNewline=False})
+    content <- many1 $ try block
     return $ FootnoteDef identifier content
 
 footnoteDefs :: Parser FootnoteDefs
