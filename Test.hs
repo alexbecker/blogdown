@@ -61,6 +61,11 @@ testHashInParagraph = expectSuccess "paragraph containing literal '#'" paragraph
     \containing '#'\n"
     "<p>This is a paragraph\n\
     \containing '#'</p>"
+testOrderedList = expectSuccess "ol" orderedList
+    " - point 1\n\
+    \ - point 2\n"
+    "<ol><li>point 1</li>\n\
+    \<li>point 2</li>\n</ol>"
 testUnorderedList = expectSuccess "ul" unorderedList
     " * point 1\n\
     \ * point 2\n"
@@ -194,6 +199,7 @@ main = do
     testParagraph
     testEscapeCharacters
     testHashInParagraph
+    testOrderedList
     testUnorderedList
     testBlockQuote
     testBlockCode

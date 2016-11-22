@@ -71,13 +71,14 @@ instance ToHtml Block where
     toHtml _ HardRule = return "<hr/>"
     toHtml r (Paragraph ls) = fmap (withTag "p" . stripEndingNewline . concat) $ mapM (toHtml r) ls
     toHtml r (Header level text) = fmap (withTag ("h" ++ show level) . stripEndingNewline . concat) $ mapM (toHtml r) text
+    toHtml r (OrderedList ls) = fmap (withTag "ol" . unlines) $ mapM (toHtml r) ls
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (toHtml r) ls
     toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . stripEndingNewline . concat) $ mapM (toHtml r) ls
     toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ escapeHtml $ unlines s
     toHtml r (BlockHtml h) = toHtml r h
 
-instance ToHtml UnorderedListItem where
-    toHtml r (UnorderedListItem ls) = fmap (withTag "li" . stripEndingNewline . concat) $ mapM (toHtml r) ls
+instance ToHtml ListItem where
+    toHtml r (ListItem _ ls) = fmap (withTag "li" . stripEndingNewline . concat) $ mapM (toHtml r) ls
 
 instance ToHtml Inline where
     toHtml r (Italics ls) = fmap (withTag "i" . concat) $ mapM (toHtml r) ls

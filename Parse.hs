@@ -141,14 +141,18 @@ header = do
     text <- many1 inline
     return $ Header (length hashes) text
 
-unorderedListItem :: Parser UnorderedListItem
-unorderedListItem = fmap UnorderedListItem $ do
-    try $ string " *"
+listItem :: Bool -> Parser ListItem
+listItem ordered = fmap (ListItem ordered) $ do
+    let identifier = if ordered then " -" else " *"
+    try $ string identifier
     many1 $ oneOf " \t"
     many1 $ inline
 
+orderedList :: Parser Block
+orderedList = fmap OrderedList $ many1 $ listItem True
+
 unorderedList :: Parser Block
-unorderedList = fmap UnorderedList $ many1 unorderedListItem
+unorderedList = fmap UnorderedList $ many1 $ listItem False
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ do
@@ -168,7 +172,7 @@ blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, hardRule, header, unorderedList, blockQuote, blockCode, paragraph]
+block = (many $ char '\n') >> choice [blockHtml, hardRule, header, orderedList, unorderedList, blockQuote, blockCode, paragraph]
 
 footnoteDef :: Parser FootnoteDef
 footnoteDef = do

@@ -73,6 +73,9 @@ Paragraphs must be separated by a blank line.
 Can contain arbitrary inline nodes.
  * **Header**: 1-6 '#' characters at the beginning of a line begins a header, with the number of '#' characters determining the header level.
 Can contain arbitrary inline nodes.
+ * **Ordered Lists**: A " \* " begins an ordered list item, which itself is a block.
+Sequential ordered list items form an ordered list.
+Can contain arbitrary inline nodes.
  * **Unordered Lists**: A " \* " begins an unordered list item, which itself is a block.
 Sequential unordered list items form an unordered list.
 Can contain arbitrary inline nodes.
@@ -110,7 +113,6 @@ The footer consists of a sequence of *footnote definitions*, each of which begin
 A footnote definition is only terminated by another footnote definition or the end of the document.
 
 ## Planned improvements
- * Ordered lists
  * Tables
  * Replacing "--" with &mdash;
  * Better error messages on parse failures

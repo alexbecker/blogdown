@@ -14,13 +14,14 @@ data FootnoteDef = FootnoteDef {
 }
     deriving (Show)
 
-data UnorderedListItem = UnorderedListItem [Inline]
+data ListItem = ListItem Bool [Inline]
     deriving (Show)
 
 data Block = HardRule
            | Paragraph [Inline]
            | Header Int [Inline]
-           | UnorderedList [UnorderedListItem]
+           | OrderedList [ListItem]
+           | UnorderedList [ListItem]
            | BlockQuote [Inline]
            | BlockCode [String]
            | BlockHtml Html
