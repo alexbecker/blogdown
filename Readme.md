@@ -18,8 +18,8 @@ Given this, I decided it was worth it to make the syntax diverge slightly in exc
 
 ## Installation
 
-Blogdown requires [GHC](https://www.haskell.org/ghc/) and [Parsec](https://hackage.haskell.org/package/parsec) to compile,
-both of which are available through common Linux package managers.
+Blogdown requires [GHC](https://www.haskell.org/ghc/), [Parsec](https://hackage.haskell.org/package/parsec) and [MissingH](https://hackage.haskell.org/package/MissingH) to compile,
+all of which are available through common Linux package managers.
 Once these are installed, run `ghc -o Blogdown Blogdown.hs` in the repository's base directory.
 
 ## Usage
@@ -34,6 +34,7 @@ The `Blogdown` binary reads from `stdin` and writes to `stdout`. Typical usage l
  * `--footnote-prefix`: Defines a prefix for the `id`s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid `id` collisions.
  * `--footnote-index-from`: The index from which footnotes are numbered. Defaults to 0.
  * `--footnote-backlinks`: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.
+ * `--em-dashes`: If this flag is passed, "--" will be replaced with "&mdash;" in text.
 
 ## Syntax
 
@@ -114,7 +115,6 @@ A footnote definition is only terminated by another footnote definition or the e
 
 ## Planned improvements
  * Tables
- * Replacing "--" with &mdash;
  * Better error messages on parse failures
  * Windows support
 

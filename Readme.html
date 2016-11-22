@@ -14,8 +14,8 @@ Blogdown's goals are:</p>
 Blogdown cannot be 100% compatible with even a majority of Markdown implementations.
 Given this, I decided it was worth it to make the syntax diverge slightly in exchange for consistency and simplicity.</p>
 <h2>Installation</h2>
-<p>Blogdown requires <a href="https://www.haskell.org/ghc/">GHC</a> and <a href="https://hackage.haskell.org/package/parsec">Parsec</a> to compile,
-both of which are available through common Linux package managers.
+<p>Blogdown requires <a href="https://www.haskell.org/ghc/">GHC</a>, <a href="https://hackage.haskell.org/package/parsec">Parsec</a> and <a href="https://hackage.haskell.org/package/MissingH">MissingH</a> to compile,
+all of which are available through common Linux package managers.
 Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the repository's base directory.</p>
 <h2>Usage</h2>
 <p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
@@ -26,6 +26,7 @@ Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the re
 <ul><li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
 <li><code>--footnote-index-from</code>: The index from which footnotes are numbered. Defaults to 0.</li>
 <li><code>--footnote-backlinks</code>: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.</li>
+<li><code>--em-dashes</code>: If this flag is passed, "--" will be replaced with "&mdash;" in text.</li>
 </ul>
 <h2>Syntax</h2>
 <h3>Differences from Markdown</h3>
@@ -89,7 +90,6 @@ The footer consists of a sequence of <i>footnote definitions</i>, each of which 
 A footnote definition is only terminated by another footnote definition or the end of the document.</p>
 <h2>Planned improvements</h2>
 <ul><li>Tables</li>
-<li>Replacing "--" with &mdash;</li>
 <li>Better error messages on parse failures</li>
 <li>Windows support</li>
 </ul>

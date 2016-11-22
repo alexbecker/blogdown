@@ -2,6 +2,7 @@ module Render where
 
 import Control.Monad.State.Lazy
 import Data.List
+import Data.List.Utils
 import Data.Maybe
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
@@ -95,7 +96,9 @@ instance ToHtml Inline where
                     [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier),
                      ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)]
                     ("[" ++ show newId ++ "]")
-    toHtml _ (Plaintext s) = return s
+    toHtml r (Plaintext s) = if emDashes r
+        then return $ replace "--" "&mdash;" s
+        else return s
     toHtml r (InlineHtml h) = toHtml r h
     toHtml r (Link text href) = fmap (withTagAttrs "a" [("href", href)] . concat) $ mapM (toHtml r) $ text
 
