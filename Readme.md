@@ -115,8 +115,11 @@ A footnote definition is only terminated by another footnote definition or the e
 
 ## Planned improvements
  * Tables
+ * Nested lists
  * Better error messages on parse failures
  * Windows support
+ * Better tests
+ * Document building & running tests
 
 ---
 
