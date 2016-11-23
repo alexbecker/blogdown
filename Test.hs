@@ -135,6 +135,8 @@ testAST = expectSuccess "whole AST" ast
     \**behind** [it](https://google.com)\n\
     \ * point 1\n\
     \ * point 2\n\
+    \ - ordered point 1\n\
+    \ - ordered point 2\n\
     \> The politician said that\n\
     \> he would fix the economy.\n\
     \    var x = 0;\n\
@@ -156,6 +158,9 @@ testAST = expectSuccess "whole AST" ast
     \<ul><li>point 1</li>\n\
     \<li>point 2</li>\n\
     \</ul>\n\
+    \<ol><li>ordered point 1</li>\n\
+    \<li>ordered point 2</li>\n\
+    \</ol>\n\
     \<blockquote>The politician said that\n\
     \he would fix the economy.</blockquote>\n\
     \<pre><code>var x = 0;\n\
