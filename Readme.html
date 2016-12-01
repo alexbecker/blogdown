@@ -69,6 +69,11 @@ Note that the first un-indented line will start a new block.</li>
 Its contents must be valid HTML, and it is ended by the corresponding closing tag.
 HTML blocks are rendered verbatim, unless HTML bleaching is enabled.</li>
 <li><b>Hard Rule</b>: A line consisting of 3+ "-" defines a hard rule.</li>
+<li><b>Table</b>: A '|'character at the beginning of a line begins a table row, consisting of table cells separated by '|' characters.
+The cells are themselves blocks, and as such can contain newlines. The rows are terminated by a '|' followed by a newline.
+By default the table has only a body, but if rows are separated by an alternating string of '+' and multiple '-' characters,
+e.g. "+---+---+", then every row above the separator will be in the header and every row below will be in the body.
+Optionally the table may start and end with such a separator as well.</li>
 </ul>
 <h4>Inline Nodes</h4>
 <p>Inline nodes can generally contain a sequence of other inline nodes, but cannot contain nodes of the same type.
@@ -89,8 +94,7 @@ if it is present in the footer.</li>
 The footer consists of a sequence of <i>footnote definitions</i>, each of which begins on a new line with ~[<i>footnote-name</i>] and consists of an arbitrary sequence of blocks.
 A footnote definition is only terminated by another footnote definition or the end of the document.</p>
 <h2>Planned improvements</h2>
-<ul><li>Tables</li>
-<li>Nested lists</li>
+<ul><li>Nested lists</li>
 <li>Better error messages on parse failures</li>
 <li>Windows support</li>
 <li>Better tests</li>
