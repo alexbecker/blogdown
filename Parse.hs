@@ -9,17 +9,17 @@ import AST
 
 data ParserState = ParserState {
     prevCharIsNewline :: Bool,
-    inBlockQuote :: Bool
+    skipPrefix :: Parser String
 }
 type Parser = Parsec String ParserState
 
 initialState = ParserState{
     prevCharIsNewline=False,
-    inBlockQuote=False
+    skipPrefix=string ""
 }
 
-specials = "*`^<>[]\\"
-firstCharSpecials = " \t#~\n" ++ specials
+specials = "*`^<>[]|\\"
+firstCharSpecials = " \t#~+\n" ++ specials
 
 nonSpecial :: Parser Char
 nonSpecial = do
@@ -28,16 +28,32 @@ nonSpecial = do
     c <- if isJust escape
         then anyChar
         else if prevCharIsNewline state
-            then if inBlockQuote state
-                then do
-                    char '>'
-                    many1 $ oneOf " \t"
-                    putState $ state {prevCharIsNewline=False}
-                    nonSpecial
-                else noneOf firstCharSpecials
+            then skipPrefix state >> noneOf firstCharSpecials
             else noneOf specials
     putState $ state {prevCharIsNewline=(c == '\n')}
     return c
+
+char' :: Char -> Parser Char
+char' c = if c == '\n'
+    then do
+        newline <|> (eof >> return '\n')
+        modifyState $ \s -> s {prevCharIsNewline=True}
+        return '\n'
+    else do
+        char c
+        modifyState $ \s -> s {prevCharIsNewline=False}
+        return c
+
+string' :: String -> Parser String
+string' = mapM char'
+
+withModifiedState :: Parser a -> (ParserState -> ParserState) -> Parser a
+withModifiedState p modifier = do
+    state <- getState
+    putState $ modifier state
+    result <- p
+    putState state
+    return result
 
 plaintext :: Parser String
 plaintext = many1 nonSpecial
@@ -48,7 +64,7 @@ escapableNoneOf blacklist = do
     c <- if isJust escape
         then anyChar
         else noneOf blacklist
-    modifyState (\s -> s {prevCharIsNewline=(c == '\n')})
+    modifyState $ \s -> s {prevCharIsNewline=(c == '\n')}
     return c
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
@@ -105,24 +121,24 @@ internalParser parentName parserNames = many1 $ choice $ inlineParsers $ delete 
 -- The bold and italics parsers are tricky because they both use the same special character.
 -- As a result, both need "try" so they do not step on each other.
 bold :: [String] -> Parser Inline
-bold parserNames = fmap Bold $ try $ between (string "**") (try $ string "**") $ internalParser "bold" parserNames
+bold parserNames = fmap Bold $ try $ between (string' "**") (try $ string' "**") $ internalParser "bold" parserNames
 
 italics :: [String] -> Parser Inline
-italics parserNames = fmap Italics $ try $ between (char '*') (char '*') $ internalParser "italics" parserNames
+italics parserNames = fmap Italics $ try $ between (char' '*') (char' '*') $ internalParser "italics" parserNames
 
 code :: Parser Inline
-code = fmap Code $ between (char '`') (char '`') $ many1 $ escapableNoneOf "`"
+code = fmap Code $ between (char' '`') (char' '`') $ many1 $ escapableNoneOf "`"
 
 footnoteRef :: Parser Inline
 footnoteRef = do
     char '^'
-    identifier <- between (char '[') (char ']') $ many1 $ escapableNoneOf "[]"
+    identifier <- between (char' '[') (char' ']') $ many1 $ escapableNoneOf "[]"
     return $ FootnoteRef identifier
 
 link :: [String] -> Parser Inline
 link parserNames = do
-    text <- between (char '[') (char ']') $ internalParser "link" parserNames
-    href <- between (char '(') (char ')') $ many $ escapableNoneOf "()"
+    text <- between (char' '[') (char' ']') $ internalParser "link" parserNames
+    href <- between (char' '(') (char' ')') $ many $ escapableNoneOf "()"
     return $ Link {text=text, href=href}
 
 inline :: Parser Inline
@@ -132,11 +148,11 @@ hardRule :: Parser Block
 hardRule = try (string "---") >> many (char '-') >> many1 (char '\n') >> return HardRule
 
 paragraph :: Parser Block
-paragraph = fmap Paragraph $ many1 $ inline
+paragraph = fmap Paragraph $ many1 inline
 
 header :: Parser Block
 header = do
-    hashes <- many1 $ char '#'
+    hashes <- many1 $ char' '#'
     many1 $ oneOf " \t"
     text <- many1 inline
     return $ Header (length hashes) text
@@ -144,7 +160,7 @@ header = do
 listItem :: Bool -> Parser ListItem
 listItem ordered = fmap (ListItem ordered) $ do
     let identifier = if ordered then " -" else " *"
-    try $ string identifier
+    try $ string' identifier
     many1 $ oneOf " \t"
     many1 $ inline
 
@@ -156,29 +172,52 @@ unorderedList = fmap UnorderedList $ many1 $ listItem False
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ do
-    char '>'
-    many1 $ oneOf " \t"
-    modifyState (\s -> s {inBlockQuote=True, prevCharIsNewline=False})
-    content <- many1 inline
-    modifyState (\s -> s {inBlockQuote=False})
-    return content
+    string "> "
+    withModifiedState (many1 inline) $ \s -> s {prevCharIsNewline=False, skipPrefix=string "> "}
 
 blockCode :: Parser Block
-blockCode = fmap BlockCode $ flip sepEndBy1 (char '\n') $ try $ do
-    char '\t' <|> (string "    " >> return '\t')
-    many $ noneOf "\n"
+blockCode = fmap (BlockCode . unlines) $ many1 $ (string "\t" <|> string "    ") >> manyTill (noneOf "\n") (char' '\n')
 
 blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
+tableCellSeparator :: Parser Char
+tableCellSeparator = try $ do
+    char' '|'
+    lookAhead $ noneOf "\n"
+
+-- Does not return TableRow because we don't know what type the cells are until the whole table is parsed.
+tableRow :: Parser [[Inline]]
+tableRow = manyTill (char' '|' >> many1 inline) (try $ string' "|\n")
+
+tableSeparator :: Parser ()
+tableSeparator = optional $ do
+    sepBy1 (char '+') (optionMaybe (char ' ') >> many1 (char '-') >> optionMaybe (char ' '))
+    char' '\n'
+
+table :: Parser Block
+table = do
+    tableSeparator
+    rows <- many1 $ tableRow
+    tableSeparator
+    rows2 <- many $ tableRow
+    let headerRows = if null rows2
+        then Nothing
+        else Just $ map (TableRow . map TableHeaderCell) rows
+    let bodyRows = map (TableRow . map TableBodyCell) $ if null rows2 then rows else rows2
+    if null rows2
+        then return ()
+        else tableSeparator
+    return $ Table headerRows bodyRows
+
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, hardRule, header, orderedList, unorderedList, blockQuote, blockCode, paragraph]
+block = (many $ char '\n') >> choice [blockHtml, hardRule, header, orderedList, unorderedList, blockQuote, table, blockCode, paragraph]
 
 footnoteDef :: Parser FootnoteDef
 footnoteDef = do
     many $ char '\n'
     char '~'
-    identifier <- between (char '[') (char ']') $ many1 $ noneOf "[]"
+    identifier <- between (char' '[') (char' ']') $ many1 $ escapableNoneOf "[]"
     many1 $ oneOf " \t"
     modifyState (\s -> s {prevCharIsNewline=False})
     content <- many1 $ try block

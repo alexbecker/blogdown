@@ -101,6 +101,60 @@ testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
     \    <span></span>\n\
     \</div>"
+testTable = expectSuccess "table" table
+    "+---+---+\n\
+    \| a | b |\n\
+    \| c | d |\n\
+    \+---+---+\n"
+    "<table><tbody><tr><td> a </td>\n\
+    \<td> b </td>\n\
+    \</tr>\n\
+    \<tr><td> c </td>\n\
+    \<td> d </td>\n\
+    \</tr>\n\
+    \</tbody></table>"
+testTableHeader = expectSuccess "table with header" table
+    "+---+---+\n\
+    \| a | b |\n\
+    \+---+---+\n\
+    \| c | d |\n\
+    \| e | f |\n\
+    \+---+---+\n"
+    "<table><thead><tr><th> a </th>\n\
+    \<th> b </th>\n\
+    \</tr>\n\
+    \</thead><tbody><tr><td> c </td>\n\
+    \<td> d </td>\n\
+    \</tr>\n\
+    \<tr><td> e </td>\n\
+    \<td> f </td>\n\
+    \</tr>\n\
+    \</tbody></table>"
+testTableMinimal = expectSuccess "minimal table" table
+    "| a | b |\n\
+    \| c | d |\n"
+    "<table><tbody><tr><td> a </td>\n\
+    \<td> b </td>\n\
+    \</tr>\n\
+    \<tr><td> c </td>\n\
+    \<td> d </td>\n\
+    \</tr>\n\
+    \</tbody></table>"
+testTableHeaderMinimal = expectSuccess "minimal table with header" table
+    "| a | b |\n\
+    \+\n\
+    \| c | d |\n\
+    \| e | f |\n"
+    "<table><thead><tr><th> a </th>\n\
+    \<th> b </th>\n\
+    \</tr>\n\
+    \</thead><tbody><tr><td> c </td>\n\
+    \<td> d </td>\n\
+    \</tr>\n\
+    \<tr><td> e </td>\n\
+    \<td> f </td>\n\
+    \</tr>\n\
+    \</tbody></table>"
 testFootnoteDef = expectSuccess "footnote definition" footnoteDef
     "~[x] This is a single list item\n\
     \of footnote.\n"
@@ -211,6 +265,10 @@ main = do
     testBlockCodeWhitespace
     testBlockCodeSpecialChars
     testBlockHtml
+    testTable
+    testTableHeader
+    testTableMinimal
+    testTableHeaderMinimal
     testFootnoteDef
     testFootnoteDefs
     testFootnoteOrdering

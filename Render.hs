@@ -75,11 +75,25 @@ instance ToHtml Block where
     toHtml r (OrderedList ls) = fmap (withTag "ol" . unlines) $ mapM (toHtml r) ls
     toHtml r (UnorderedList ls) = fmap (withTag "ul" . unlines) $ mapM (toHtml r) ls
     toHtml r (BlockQuote ls) = fmap (withTag "blockquote" . stripEndingNewline . concat) $ mapM (toHtml r) ls
-    toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ escapeHtml $ unlines s
+    toHtml _ (BlockCode s) = return $ withTag "pre" $ withTag "code" $ escapeHtml s
     toHtml r (BlockHtml h) = toHtml r h
+    toHtml r (Table Nothing trs) = do
+        bodyRows <- mapM (toHtml r) trs
+        return $ withTag "table" $ withTag "tbody" $ unlines bodyRows
+    toHtml r (Table (Just ths) trs) = do
+        headerRows <- mapM (toHtml r) ths
+        bodyRows <- mapM (toHtml r) trs
+        return $ withTag "table" $ (withTag "thead" $ unlines headerRows) ++ (withTag "tbody" $ unlines bodyRows)
 
 instance ToHtml ListItem where
     toHtml r (ListItem _ ls) = fmap (withTag "li" . stripEndingNewline . concat) $ mapM (toHtml r) ls
+
+instance ToHtml TableCell where
+    toHtml r (TableHeaderCell tds) = fmap (withTag "th" . concat) $ mapM (toHtml r) tds
+    toHtml r (TableBodyCell tds) = fmap (withTag "td" . concat) $ mapM (toHtml r) tds
+
+instance ToHtml TableRow where
+    toHtml r (TableRow tcs) = fmap (withTag "tr" . unlines) $ mapM (toHtml r) tcs
 
 instance ToHtml Inline where
     toHtml r (Italics ls) = fmap (withTag "i" . concat) $ mapM (toHtml r) ls

@@ -17,14 +17,25 @@ data FootnoteDef = FootnoteDef {
 data ListItem = ListItem Bool [Inline]
     deriving (Show)
 
+data TableCell = TableHeaderCell [Inline]
+               | TableBodyCell [Inline]
+    deriving (Show)
+
+data TableRow = TableRow [TableCell]
+    deriving (Show)
+
 data Block = HardRule
            | Paragraph [Inline]
            | Header Int [Inline]
            | OrderedList [ListItem]
            | UnorderedList [ListItem]
            | BlockQuote [Inline]
-           | BlockCode [String]
+           | BlockCode String
            | BlockHtml Html
+           | Table {
+    head :: Maybe [TableRow],
+    body :: [TableRow]
+}
     deriving (Show)
 
 data Inline = Italics [Inline]
@@ -41,6 +52,7 @@ data Inline = Italics [Inline]
 
 data HtmlTagType = Open | Close | SelfClosing
     deriving (Show, Eq)
+
 data HtmlTag = HtmlTag {
     tagname :: String,
     attrs :: [Attr]
