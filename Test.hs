@@ -20,7 +20,7 @@ printExpectedSuccess name input expected parsed = if output == expected
         putStrLn "expect:"
         putStrLn expected
     where
-        output = render defaultRenderOptions parsed
+        output = toHtml defaultRenderOptions parsed
 
 expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO ()
 expectSuccess name p input expected = either
@@ -202,7 +202,7 @@ goldenTest inFilePath goldenFilePath renderArgs = do
     either
         (const $ putStrLn $ "FAIL: " ++ goldenFilePath)
         (\parsed -> do
-            let rendered = render r parsed
+            let rendered = toHtml r parsed
             if rendered == golden
                 then putStrLn $ "PASS: " ++ goldenFilePath
                 else do

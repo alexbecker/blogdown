@@ -12,4 +12,4 @@ main = do
     renderOptions <- getRenderOptions
     input <- getContents
     let result = runParser ast Parse.initialState "test" input
-    putStr $ either show (render renderOptions) result
+    putStr $ either show (toHtml renderOptions) result
