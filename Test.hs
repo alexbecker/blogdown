@@ -37,7 +37,7 @@ testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
 testFootnoteRef = expectSuccess "footnote reference" footnoteRef
     "^[x]"
-    "<sup><a href=\"#-footnote-x\" id=\"a--footnote-x\">[0]</a></sup>"
+    "<sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup>"
 testLink = expectSuccess "link" inline
     "[Google](https://google.com)"
     "<a href=\"https://google.com\">Google</a>"
@@ -155,11 +155,14 @@ testTableHeaderMinimal = expectSuccess "minimal table with header" table
     \<td> f </td>\n\
     \</tr>\n\
     \</tbody></table>"
-testFootnoteDef = expectSuccess "footnote definition" footnoteDef
-    "~[x] This is a single list item\n\
+testFootnoteDef = expectSuccess "footnote definition" ast
+    "^[x]\n\
+    \~[x] This is a single list item\n\
     \of footnote.\n"
-    "<li id=\"-footnote-x\"><p>This is a single list item\n\
-    \of footnote.</p></li>"
+    "<p><sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup></p>\n\
+    \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>This is a single list item\n\
+    \of footnote.</p></li>\n\
+    \</ol>\n"
 testFootnoteDefs = expectSuccess "multiple footnote definitions" ast
     "^[0]^[1]^[2]\n\
     \~[0] a\n\

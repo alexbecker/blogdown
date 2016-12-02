@@ -37,7 +37,7 @@ Footnotes can be referenced inline with ^[<i>footnote-name</i>], which will rend
 at the end of the document, which is defined by ~[<i>footnote-name</i>] followed by the footnote contents.</p>
 <h4>Markdown Incompatibilities</h4>
 <p>Blogdown does not support the Markdown syntax of underlining text with '=' or '-' characters to define a header,
-as this comes at a large cost in the parser implementation<sup><a href="#-footnote-underline-parser-complexity" id="a--footnote-underline-parser-complexity">[0]</a></sup>.
+as this comes at a large cost in the parser implementation<sup><a href="#-footnote-0" id="a--footnote-0">[0]</a></sup>.
 The '#' syntax for headers is supported instead.</p>
 <p>It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
 The "&lt;br/&gt;" tag is supported instead.</p>
@@ -86,7 +86,7 @@ Despite the name, inline nodes can span multiple lines, e.g. to accomodate line 
 <li><b>Link</b>: A <a href="#">link</a> is written as "[<i>text</i>](<i>href</i>)". The <i>text</i> portion can contain any other type of inline node.
 The <i>href</i> portion is the link destination, and is parsed verbatim except that any literal "(" or ")" must be escaped.</li>
 <li><b>Footnote Reference</b>: Writing ^[<i>footnote-name</i>] defines a footnote reference.
-It is rendered as a superscript footnote number<sup><a href="#-footnote-footnote-numbering" id="a--footnote-footnote-numbering">[1]</a></sup>, and links to the footnote named <i>footnote-name</i>
+It is rendered as a superscript footnote number<sup><a href="#-footnote-1" id="a--footnote-1">[1]</a></sup>, and links to the footnote named <i>footnote-name</i>
 if it is present in the footer.</li>
 </ul>
 <h4>Footer</h4>
@@ -101,6 +101,6 @@ A footnote definition is only terminated by another footnote definition or the e
 <li>Document building & running tests</li>
 </ul>
 <hr/>
-<ol start="0" class="footnotes"><li id="-footnote-underline-parser-complexity"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
-<li id="-footnote-footnote-numbering"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
+<ol start="0" class="footnotes"><li id="-footnote-0"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
+<li id="-footnote-1"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
 </ol>

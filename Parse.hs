@@ -4,18 +4,21 @@ import Data.List
 import Data.Maybe
 import Text.Parsec
 import Text.Parsec.Char
+import qualified Data.Map.Strict as M
 
 import AST
 
 data ParserState = ParserState {
     prevCharIsNewline :: Bool,
-    skipPrefix :: Parser String
+    skipPrefix :: Parser String,
+    footnoteIndices :: M.Map String Int
 }
 type Parser = Parsec String ParserState
 
 initialState = ParserState{
     prevCharIsNewline=False,
-    skipPrefix=string ""
+    skipPrefix=string "",
+    footnoteIndices=M.fromList []
 }
 
 specials = "*`^<>[]|\\"
@@ -133,7 +136,16 @@ footnoteRef :: Parser Inline
 footnoteRef = do
     char '^'
     identifier <- between (char' '[') (char' ']') $ many1 $ escapableNoneOf "[]"
-    return $ FootnoteRef identifier
+    state <- getState
+    let f = footnoteIndices state
+    let maybeIndex = M.lookup identifier f
+    if isJust maybeIndex
+        then fail $ "repeated footnote identifier: " ++ (show $ fromJust maybeIndex)
+        else return ()
+    let index = M.size f
+    let f' = M.insert identifier index f
+    putState $ state {footnoteIndices=f'}
+    return $ FootnoteRef index
 
 link :: [String] -> Parser Inline
 link parserNames = do
@@ -218,10 +230,15 @@ footnoteDef = do
     many $ char '\n'
     char '~'
     identifier <- between (char' '[') (char' ']') $ many1 $ escapableNoneOf "[]"
+    state <- getState
+    let maybeIndex = M.lookup identifier $ footnoteIndices state
+    index <- if isNothing maybeIndex
+        then fail $ "unreferenced footnote identifier: " ++ identifier
+        else return $ fromJust maybeIndex
     many1 $ oneOf " \t"
     modifyState (\s -> s {prevCharIsNewline=False})
     content <- many1 $ try block
-    return $ FootnoteDef identifier content
+    return $ FootnoteDef index content
 
 footnoteDefs :: Parser FootnoteDefs
 footnoteDefs = fmap FootnoteDefs $ many1 footnoteDef

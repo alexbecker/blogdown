@@ -49,19 +49,16 @@ escapeHtml = concatMap escapeChar where
 
 instance ToHtml FootnoteDefs where
     toHtml r (FootnoteDefs fs) = do
-        fsRendered <- mapM (toHtml r) fs
-        mapping <- gets footnotes
-        let permutation = sortOn (fromJust . flip M.lookup mapping . identifier . (fs !!)) [0 .. length fs - 1]
-        let fsSorted = map (fsRendered !!) permutation
-        return $ (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r), ("class", "footnotes")] . unlines) fsSorted
+        fs' <- mapM (toHtml r) $ sortOn index fs
+        return $ (withTagAttrs "ol" [("start", show $ footnoteIndexFrom r), ("class", "footnotes")] . unlines) fs'
 
 instance ToHtml FootnoteDef where
-    toHtml r (FootnoteDef identifier ls) = do
+    toHtml r (FootnoteDef index ls) = do
     content <- mapM (toHtml r) ls
     let content' = if footnoteBacklinks r
-        then withTagAttrs "a" [("href", "#a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)] "^" ++ "\n" ++ fancyUnlines content
+        then withTagAttrs "a" [("href", "#a-" ++ (footnotePrefix r) ++ "-footnote-" ++ show index)] "^" ++ "\n" ++ fancyUnlines content
         else fancyUnlines content
-    return $ withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ identifier)] content'
+    return $ withTagAttrs "li" [("id", (footnotePrefix r) ++ "-footnote-" ++ show index)] content'
 
 stripEndingNewline :: String -> String
 stripEndingNewline s = if last s == '\n'
@@ -99,17 +96,10 @@ instance ToHtml Inline where
     toHtml r (Italics ls) = fmap (withTag "i" . concat) $ mapM (toHtml r) ls
     toHtml r (Bold ls) = fmap (withTag "b" . concat) $ mapM (toHtml r) ls
     toHtml _ (Code s) = return $ withTag "code" $ escapeHtml s
-    toHtml r (FootnoteRef identifier) = do
-        fs <- gets footnotes
-        let newId = M.size fs
-        if isJust (M.lookup identifier fs)
-            then fail $ "repeated footnote identifier: " ++ identifier
-            else do
-                put $ RenderState {footnotes=M.insert identifier newId fs}
-                return $ withTag "sup" $ withTagAttrs "a"
-                    [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier),
-                     ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ identifier)]
-                    ("[" ++ show newId ++ "]")
+    toHtml r (FootnoteRef index) = return $ withTag "sup" $ withTagAttrs "a"
+        [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ show index),
+         ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ show index)]
+        ("[" ++ show index ++ "]")
     toHtml r (Plaintext s) = if emDashes r
         then return $ replace "--" "&mdash;" s
         else return s

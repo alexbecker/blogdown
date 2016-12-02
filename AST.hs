@@ -9,7 +9,7 @@ data FootnoteDefs = FootnoteDefs [FootnoteDef]
     deriving (Show)
 
 data FootnoteDef = FootnoteDef {
-    identifier :: String,
+    index :: Int,
     content :: [Block]
 }
     deriving (Show)
@@ -41,7 +41,7 @@ data Block = HardRule
 data Inline = Italics [Inline]
             | Bold [Inline]
             | Code String
-            | FootnoteRef String
+            | FootnoteRef Int
             | Plaintext String
             | InlineHtml Html
             | Link {
