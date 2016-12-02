@@ -179,56 +179,6 @@ testFootnoteOrdering = expectSuccess "footnotes should be sorted by first refere
     \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>a</p></li>\n\
     \<li id=\"-footnote-1\"><p>b</p></li>\n\
     \</ol>\n"
-testAST = expectSuccess "whole AST" ast
-    "# hello\n\
-    \\n\
-    \This is a paragraph\n\
-    \of text.\n\
-    \\n\
-    \Now *with* some^[x] `styling`\n\
-    \**behind** [it](https://google.com)\n\
-    \ * point 1\n\
-    \ * point 2\n\
-    \ - ordered point 1\n\
-    \ - ordered point 2\n\
-    \> The politician said that\n\
-    \> he would fix the economy.\n\
-    \    var x = 0;\n\
-    \    alert(x);\n\
-    \\n\
-    \This is a paragraph.\n\
-    \There are many like it but this one is mine.\n\
-    \<div class=\"class\">\n\
-    \    <span>foo</span>\n\
-    \</div>\n\
-    \---\n\
-    \~[x] This is a paragraph\n\
-    \of footnote.\n"
-    "<h1>hello</h1>\n\
-    \<p>This is a paragraph\n\
-    \of text.</p>\n\
-    \<p>Now <i>with</i> some<sup><a href=\"#-footnote-x\" id=\"a--footnote-x\">[0]</a></sup> <code>styling</code>\n\
-    \<b>behind</b> <a href=\"https://google.com\">it</a></p>\n\
-    \<ul><li>point 1</li>\n\
-    \<li>point 2</li>\n\
-    \</ul>\n\
-    \<ol><li>ordered point 1</li>\n\
-    \<li>ordered point 2</li>\n\
-    \</ol>\n\
-    \<blockquote>The politician said that\n\
-    \he would fix the economy.</blockquote>\n\
-    \<pre><code>var x = 0;\n\
-    \alert(x);\n\
-    \</code></pre>\n\
-    \<p>This is a paragraph.\n\
-    \There are many like it but this one is mine.\n\
-    \<div class=\"class\">\n\
-    \    <span>foo</span>\n\
-    \</div></p>\n\
-    \<hr/>\n\
-    \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-x\"><p>This is a paragraph\n\
-    \of footnote.</p></li>\n\
-    \</ol>\n"
 
 expectFailure :: String -> (Parser a) -> String -> IO ()
 expectFailure name p input = either
@@ -289,7 +239,6 @@ main = do
     testFootnoteDef
     testFootnoteDefs
     testFootnoteOrdering
-    testAST
     testNestedBold
     testNestedLink
     testUnclosedTag
