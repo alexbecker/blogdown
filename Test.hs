@@ -241,20 +241,21 @@ testNestedLink = expectFailure "links cannot be nested" inline "[[a](https://a.c
 testUnclosedTag = expectFailure "unclosed tag should fail to parse" html "<p>hello"
 testMismatchedTags = expectFailure "mismatched tags should fail to parse" html "<a>hello</b>"
 
-goldenTest :: FilePath -> FilePath -> RenderOptions -> IO ()
-goldenTest inFilePath goldenFilePath r = do
+goldenTest :: FilePath -> FilePath -> String -> IO ()
+goldenTest inFilePath goldenFilePath renderArgs = do
+    let r = renderOptions $ words renderArgs
     input <- readFile inFilePath
     golden <- readFile goldenFilePath
     either
-        (const $ putStrLn $ "FAIL: " ++ inFilePath)
+        (const $ putStrLn $ "FAIL: " ++ goldenFilePath)
         (\parsed -> do
             let rendered = render r parsed
             if rendered == golden
-                then putStrLn $ "PASS: " ++ inFilePath
+                then putStrLn $ "PASS: " ++ goldenFilePath
                 else do
-                    let failPath = inFilePath ++ ".fail"
+                    let failPath = goldenFilePath ++ ".fail"
                     writeFile failPath rendered
-                    putStrLn $ "FAIL: " ++ inFilePath)
+                    putStrLn $ "FAIL: " ++ goldenFilePath)
         $ runParser ast Parse.initialState inFilePath input
 
 main :: IO ()
@@ -293,4 +294,4 @@ main = do
     testNestedLink
     testUnclosedTag
     testMismatchedTags
-    goldenTest "Readme.md" "Readme.html" defaultRenderOptions
+    goldenTest "Readme.md" "Readme.html" ""
