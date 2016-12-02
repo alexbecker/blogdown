@@ -295,3 +295,7 @@ main = do
     testUnclosedTag
     testMismatchedTags
     goldenTest "Readme.md" "Readme.html" ""
+    goldenTest "goldens/golden1.md" "goldens/golden1.html" "--em-dashes"
+    goldenTest "goldens/golden1.md" "goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks"
+    goldenTest "goldens/golden2.md" "goldens/golden2.html" "--em-dashes"
+    goldenTest "goldens/golden2.md" "goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks"
