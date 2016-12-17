@@ -4,15 +4,18 @@ The Blogdown-formatted output is in Readme.html.</i></p>
 <p>Blogdown is a markup language based on Markdown, designed for writing blog posts.
 Blogdown's goals are:</p>
 <ul><li>Clean syntax for common blog post features absent from Markdown.</li>
-<li>Simple, well-defined parsing rules.</li>
 <li>Ability to handle untrusted input.</li>
-<li>Handling line breaks gracefully.</li>
-<li>Compatibility with common Markdown implementations.</li>
+<li>Simple syntax, with no surprises.</li>
+<li>Debuggability.</li>
+<li>Near compatibility with common Markdown implementations.</li>
 </ul>
 <p>Because there is no Markdown standard and existing Markdown implementations
 <a href="http://johnmacfarlane.net/babelmark2/?text=Hello+world%0A*+this+is+a+list%0A%3E+this+is+a+quote">disagree wildly even on simple cases</a>,
 Blogdown cannot be 100% compatible with even a majority of Markdown implementations.
-Given this, I decided it was worth it to make the syntax diverge slightly in exchange for consistency and simplicity.</p>
+While there have been attemps to create a common Markdown standard&mdash;most notably <a href="http://commonmark.org/">CommonMark</a>&mdash;they
+are necessarily quite complex. The primary cause of this complexity is that Markdown insists on rendering <i>something</i> for every input,
+no matter how malformed. Blogdown is considerably simpler, and hopefully easier for authors to debug, because it fails on malformed inputs.
+With full compatability out of the window, I have chosen to make some other small improvements on Markdown syntax.</p>
 <h2>Installation</h2>
 <p>Blogdown requires <a href="https://www.haskell.org/ghc/">GHC</a>, <a href="https://hackage.haskell.org/package/parsec">Parsec</a> and <a href="https://hackage.haskell.org/package/MissingH">MissingH</a> to compile,
 all of which are available through common Linux package managers.
@@ -26,7 +29,7 @@ Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the re
 <ul><li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
 <li><code>--footnote-index-from</code>: The index from which footnotes are numbered. Defaults to 0.</li>
 <li><code>--footnote-backlinks</code>: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.</li>
-<li><code>--em-dashes</code>: If this flag is passed, "--" will be replaced with "&mdash;" in text.</li>
+<li><code>--em-dashes</code>: If this flag is passed, "&mdash;" will be replaced with "&mdash;" in text.</li>
 </ul>
 <h2>Syntax</h2>
 <h3>Differences from Markdown</h3>
@@ -72,7 +75,7 @@ HTML blocks are rendered verbatim, unless HTML bleaching is enabled.</li>
 <li><b>Table</b>: A '|'character at the beginning of a line begins a table row, consisting of table cells separated by '|' characters.
 The cells are themselves blocks, and as such can contain newlines. The rows are terminated by a '|' followed by a newline.
 By default the table has only a body, but if rows are separated by an alternating string of '+' and multiple '-' characters,
-e.g. "+---+---+", then every row above the separator will be in the header and every row below will be in the body.
+e.g. "+&mdash;-+&mdash;-+", then every row above the separator will be in the header and every row below will be in the body.
 Optionally the table may start and end with such a separator as well.</li>
 </ul>
 <h4>Inline Nodes</h4>

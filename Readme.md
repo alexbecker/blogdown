@@ -6,15 +6,18 @@ The Blogdown-formatted output is in Readme.html.*
 Blogdown is a markup language based on Markdown, designed for writing blog posts.
 Blogdown's goals are:
  * Clean syntax for common blog post features absent from Markdown.
- * Simple, well-defined parsing rules.
  * Ability to handle untrusted input.
- * Handling line breaks gracefully.
- * Compatibility with common Markdown implementations.
+ * Simple syntax, with no surprises.
+ * Debuggability.
+ * Near compatibility with common Markdown implementations.
 
 Because there is no Markdown standard and existing Markdown implementations
 [disagree wildly even on simple cases](http://johnmacfarlane.net/babelmark2/?text=Hello+world%0A*+this+is+a+list%0A%3E+this+is+a+quote),
 Blogdown cannot be 100% compatible with even a majority of Markdown implementations.
-Given this, I decided it was worth it to make the syntax diverge slightly in exchange for consistency and simplicity.
+While there have been attemps to create a common Markdown standard--most notably [CommonMark](http://commonmark.org/)--they
+are necessarily quite complex. The primary cause of this complexity is that Markdown insists on rendering *something* for every input,
+no matter how malformed. Blogdown is considerably simpler, and hopefully easier for authors to debug, because it fails on malformed inputs.
+With full compatability out of the window, I have chosen to make some other small improvements on Markdown syntax.
 
 ## Installation
 
