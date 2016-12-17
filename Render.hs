@@ -87,7 +87,7 @@ instance ToHtml Inline where
         [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ show index),
          ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ show index)]
         ("[" ++ show index ++ "]")
-    toHtml r (Plaintext s) = if emDashes r
+    toHtml r (Plaintext s) = escapeHtml $ if emDashes r
         then replace "--" "&mdash;" s
         else s
     toHtml r (InlineHtml h) = toHtml r h
