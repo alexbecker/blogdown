@@ -31,6 +31,11 @@ The `Blogdown` binary reads from `stdin` and writes to `stdout`. Typical usage l
 
     cat blogpost.md | ./Blogdown > blogpost.html
 
+### Optional Styling and Scripts
+
+It is recommended to include `footnotes.css` and `footnotes.js` on any pages which make use of Blogdown-generated footnotes,
+which improve the appearance of footnotes and allow them to be shown inline.
+
 ### Optional Flags
 
 `Blogdown` accepts the following long-style flags:
@@ -61,6 +66,8 @@ It also does not support using multiple trailing spaces to force a breakpoint at
 The "&lt;br/&gt;" tag is supported instead.
 
 The '\~' and '\^' characters are now special, and must be escaped to be used in text.
+Additionally, while most Markdown implementations do not require escaping many special characters when their special meaning would
+not be valid, Blogdown always requires they be escaped.
 
 ### Formal Description
 
@@ -127,6 +134,8 @@ A footnote definition is only terminated by another footnote definition or the e
  * Windows support
  * Better tests
  * Document building & running tests
+ * Comments
+ * Continuation character
 
 ---
 

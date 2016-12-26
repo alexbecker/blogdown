@@ -24,6 +24,9 @@ Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the re
 <p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
 <pre><code>cat blogpost.md | ./Blogdown &gt; blogpost.html
 </code></pre>
+<h3>Optional Styling and Scripts</h3>
+<p>It is recommended to include <code>footnotes.css</code> and <code>footnotes.js</code> on any pages which make use of Blogdown-generated footnotes,
+which improve the appearance of footnotes and allow them to be shown inline.</p>
 <h3>Optional Flags</h3>
 <p><code>Blogdown</code> accepts the following long-style flags:</p>
 <ul><li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
@@ -44,7 +47,9 @@ as this comes at a large cost in the parser implementation<sup><a href="#-footno
 The '#' syntax for headers is supported instead.</p>
 <p>It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
 The "&lt;br/&gt;" tag is supported instead.</p>
-<p>The '~' and '^' characters are now special, and must be escaped to be used in text.</p>
+<p>The '~' and '^' characters are now special, and must be escaped to be used in text.
+Additionally, while most Markdown implementations do not require escaping many special characters when their special meaning would
+not be valid, Blogdown always requires they be escaped.</p>
 <h3>Formal Description</h3>
 <p>The body of a Blogdown document consists of a sequence of <i>block nodes</i>, which in turn consist of <i>inline nodes</i>.</p>
 <h4>Block Nodes</h4>
@@ -102,6 +107,8 @@ A footnote definition is only terminated by another footnote definition or the e
 <li>Windows support</li>
 <li>Better tests</li>
 <li>Document building & running tests</li>
+<li>Comments</li>
+<li>Continuation character</li>
 </ul>
 <hr/>
 <ol start="0" class="footnotes"><li id="-footnote-0"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
