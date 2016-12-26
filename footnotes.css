@@ -1,0 +1,13 @@
+.footnotes > li {
+    margin: 15px 0;
+}
+
+/* Keeps the back-link on the same line as the first block. */
+.footnotes > li > *:nth-child(2) {
+    display: inline;
+}
+
+.inline-footnote {
+    margin: 1em;
+    color: #555;
+}
