@@ -4,6 +4,7 @@ import Control.Monad.State.Lazy
 import Data.List
 import Data.List.Utils
 import Data.Maybe
+import System.IO.Unsafe
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 
@@ -13,9 +14,19 @@ import RenderOptions
 class ToHtml a where
     toHtml :: RenderOptions -> a -> String
 
+optionalJS :: RenderOptions -> String
+optionalJS r = if (inlineJS r)
+    then "<script>" ++ (unsafePerformIO $ readFile "footnotes.js") ++ "</script>\n"
+    else ""
+
+optionalCSS :: RenderOptions -> String
+optionalCSS r = if (inlineCSS r)
+    then "<style>" ++ (unsafePerformIO $ readFile "footnotes.css") ++ "</style>\n"
+    else ""
+
 instance ToHtml AST where
-    toHtml r (AST bs Nothing) = unlines $ map (toHtml r) bs
-    toHtml r (AST bs (Just f)) = body ++ footnotes ++ "\n" where
+    toHtml r (AST bs Nothing) = (unlines $ map (toHtml r) bs) ++ optionalCSS r ++ optionalJS r
+    toHtml r (AST bs (Just f)) = body ++ footnotes ++ "\n" ++ optionalCSS r ++ optionalJS r where
         body = unlines $ map (toHtml r) bs
         footnotes = toHtml r f
 

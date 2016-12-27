@@ -35,6 +35,7 @@ The `Blogdown` binary reads from `stdin` and writes to `stdout`. Typical usage l
 
 It is recommended to include `footnotes.css` and `footnotes.js` on any pages which make use of Blogdown-generated footnotes,
 which improve the appearance of footnotes and allow them to be shown inline.
+These can be inlined using the `--inline-css` and `--inline-js` flags respectively^[inline].
 
 ### Optional Flags
 
@@ -43,6 +44,8 @@ which improve the appearance of footnotes and allow them to be shown inline.
  * `--footnote-index-from`: The index from which footnotes are numbered. Defaults to 0.
  * `--footnote-backlinks`: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.
  * `--em-dashes`: If this flag is passed, "--" will be replaced with "&mdash;" in text.
+ * `--inline-css`: If this flag is passed, the recommended CSS will be inlined at the end of the output document.
+ * `--inline-js`: If this flag is passed, the recommended JS will be inlined at the end of the output document.
 
 ## Syntax
 
@@ -138,6 +141,9 @@ A footnote definition is only terminated by another footnote definition or the e
  * Continuation character
 
 ---
+
+~[inline] Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.
+Doing so will degrade network and browser performance slightly.
 
 ~[underline-parser-complexity] Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.
 

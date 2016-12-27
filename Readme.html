@@ -26,13 +26,16 @@ Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the re
 </code></pre>
 <h3>Optional Styling and Scripts</h3>
 <p>It is recommended to include <code>footnotes.css</code> and <code>footnotes.js</code> on any pages which make use of Blogdown-generated footnotes,
-which improve the appearance of footnotes and allow them to be shown inline.</p>
+which improve the appearance of footnotes and allow them to be shown inline.
+These can be inlined using the <code>--inline-css</code> and <code>--inline-js</code> flags respectively<sup><a href="#-footnote-0" id="a--footnote-0">[0]</a></sup>.</p>
 <h3>Optional Flags</h3>
 <p><code>Blogdown</code> accepts the following long-style flags:</p>
 <ul><li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
 <li><code>--footnote-index-from</code>: The index from which footnotes are numbered. Defaults to 0.</li>
 <li><code>--footnote-backlinks</code>: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.</li>
 <li><code>--em-dashes</code>: If this flag is passed, "&mdash;" will be replaced with "&mdash;" in text.</li>
+<li><code>--inline-css</code>: If this flag is passed, the recommended CSS will be inlined at the end of the output document.</li>
+<li><code>--inline-js</code>: If this flag is passed, the recommended JS will be inlined at the end of the output document.</li>
 </ul>
 <h2>Syntax</h2>
 <h3>Differences from Markdown</h3>
@@ -43,7 +46,7 @@ Footnotes can be referenced inline with ^[<i>footnote-name</i>], which will rend
 at the end of the document, which is defined by ~[<i>footnote-name</i>] followed by the footnote contents.</p>
 <h4>Markdown Incompatibilities</h4>
 <p>Blogdown does not support the Markdown syntax of underlining text with '=' or '-' characters to define a header,
-as this comes at a large cost in the parser implementation<sup><a href="#-footnote-0" id="a--footnote-0">[0]</a></sup>.
+as this comes at a large cost in the parser implementation<sup><a href="#-footnote-1" id="a--footnote-1">[1]</a></sup>.
 The '#' syntax for headers is supported instead.</p>
 <p>It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
 The "&lt;br/&gt;" tag is supported instead.</p>
@@ -94,7 +97,7 @@ Despite the name, inline nodes can span multiple lines, e.g. to accomodate line 
 <li><b>Link</b>: A <a href="#">link</a> is written as "[<i>text</i>](<i>href</i>)". The <i>text</i> portion can contain any other type of inline node.
 The <i>href</i> portion is the link destination, and is parsed verbatim except that any literal "(" or ")" must be escaped.</li>
 <li><b>Footnote Reference</b>: Writing ^[<i>footnote-name</i>] defines a footnote reference.
-It is rendered as a superscript footnote number<sup><a href="#-footnote-1" id="a--footnote-1">[1]</a></sup>, and links to the footnote named <i>footnote-name</i>
+It is rendered as a superscript footnote number<sup><a href="#-footnote-2" id="a--footnote-2">[2]</a></sup>, and links to the footnote named <i>footnote-name</i>
 if it is present in the footer.</li>
 </ul>
 <h4>Footer</h4>
@@ -111,6 +114,63 @@ A footnote definition is only terminated by another footnote definition or the e
 <li>Continuation character</li>
 </ul>
 <hr/>
-<ol start="0" class="footnotes"><li id="-footnote-0"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
-<li id="-footnote-1"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
+<ol start="0" class="footnotes"><li id="-footnote-0"><p>Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.
+Doing so will degrade network and browser performance slightly.</p></li>
+<li id="-footnote-1"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
+<li id="-footnote-2"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
 </ol>
+<style>.footnotes > li {
+    margin: 15px 0;
+}
+
+/* Keeps the back-link on the same line as the first block. */
+.footnotes > li > *:nth-child(2) {
+    display: inline;
+}
+
+.inline-footnote {
+    margin: 1em;
+    color: #555;
+}
+</style>
+<script>function inlineFootnote(footnote) {
+    var ref = document.getElementById("a-" + footnote.id);
+    var inline = document.createElement("div");
+    for (var i=0; i<footnote.children.length; i++) {
+        var child = footnote.children[i];
+        if (child.tagName == "A" && child.getAttribute("href") == "#" + ref.id) {
+            continue;
+        }
+        inline.appendChild(child);
+    }
+    inline.className = "inline-footnote";
+    inline.style.display = "none";
+    ref.parentNode.parentNode.insertBefore(inline, ref.parentNode.nextSibling);
+    ref.origIndex = ref.textContent;
+    ref.expanded = false;
+    ref.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (ref.expanded) {
+            inline.style.display = "none";
+            ref.textContent = ref.origIndex;
+        } else {
+            inline.style.display = "block";
+            ref.textContent = "X";
+        }
+        ref.expanded = !ref.expanded;
+    });
+}
+
+function inlineFootnotes() {
+    var footnoteLists = document.getElementsByClassName("footnotes");
+    while (footnoteLists.length > 0) {
+        var footnotes = footnoteLists[0].children;
+        for (var j=0; j<footnotes.length; j++) {
+            inlineFootnote(footnotes[j]);
+        }
+        footnoteLists[0].remove();
+    }
+}
+
+inlineFootnotes()
+</script>
