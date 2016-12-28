@@ -43,7 +43,7 @@ These can be inlined using the `--inline-css` and `--inline-js` flags respective
  * `--footnote-prefix`: Defines a prefix for the `id`s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid `id` collisions.
  * `--footnote-index-from`: The index from which footnotes are numbered. Defaults to 0.
  * `--footnote-backlinks`: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.
- * `--em-dashes`: If this flag is passed, "--" will be replaced with "&mdash;" in text.
+ * `--em-dashes`: If this flag is passed, `--` will be replaced with "&mdash;" in text.
  * `--inline-css`: If this flag is passed, the recommended CSS will be inlined at the end of the output document.
  * `--inline-js`: If this flag is passed, the recommended JS will be inlined at the end of the output document.
 
@@ -61,14 +61,14 @@ at the end of the document, which is defined by \~\[*footnote-name*\] followed b
 
 #### Markdown Incompatibilities
 
-Blogdown does not support the Markdown syntax of underlining text with '=' or '-' characters to define a header,
+Blogdown does not support the Markdown syntax of underlining text with `=` or `-` characters to define a header,
 as this comes at a large cost in the parser implementation^[underline-parser-complexity].
-The '#' syntax for headers is supported instead.
+The `#` syntax for headers is supported instead.
 
 It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
-The "&lt;br/&gt;" tag is supported instead.
+The `<br/>` tag is supported instead.
 
-The '\~' and '\^' characters are now special, and must be escaped to be used in text.
+The `\~` and `\^` characters are now special, and must be escaped to be used in text.
 Additionally, while most Markdown implementations do not require escaping many special characters when their special meaning would
 not be valid, Blogdown always requires they be escaped.
 
@@ -85,28 +85,28 @@ The following block node types are supported:
  * **Paragraph**: The default block type; any content not in another block is part of a paragraph.
 Paragraphs must be separated by a blank line.
 Can contain arbitrary inline nodes.
- * **Header**: 1-6 '#' characters at the beginning of a line begins a header, with the number of '#' characters determining the header level.
+ * **Header**: 1-6 `#` characters at the beginning of a line begins a header, with the number of `#` characters determining the header level.
 Can contain arbitrary inline nodes.
- * **Ordered Lists**: A " \* " begins an ordered list item, which itself is a block.
+ * **Ordered Lists**: A ` * ` begins an ordered list item, which itself is a block.
 Sequential ordered list items form an ordered list.
 Can contain arbitrary inline nodes.
- * **Unordered Lists**: A " \* " begins an unordered list item, which itself is a block.
+ * **Unordered Lists**: A ` * ` begins an unordered list item, which itself is a block.
 Sequential unordered list items form an unordered list.
 Can contain arbitrary inline nodes.
- * **Blockquote**: Lines beginning with "&gt; " define a blockquote.
+ * **Blockquote**: Lines beginning with `> ` define a blockquote.
 Can contain arbitrary inline nodes.
-Note that the first line not beginning with "&gt; " will start a new block.
+Note that the first line not beginning with `> ` will start a new block.
  * **Code Block**: Lines indented with 4+ spaces or a tab define a code block.
 Code blocks are rendered verbatim, ignoring special characters.
 Note that the first un-indented line will start a new block.
  * **HTML Block**: An HTML tag at the beginning of a line starts an HTML block.
 Its contents must be valid HTML, and it is ended by the corresponding closing tag.
 HTML blocks are rendered verbatim, unless HTML bleaching is enabled.
- * **Hard Rule**: A line consisting of 3+ "-" defines a hard rule.
- * **Table**: A '\|'character at the beginning of a line begins a table row, consisting of table cells separated by '\|' characters.
-The cells are themselves blocks, and as such can contain newlines. The rows are terminated by a '\|' followed by a newline.
-By default the table has only a body, but if rows are separated by an alternating string of '\+' and multiple '-' characters,
-e.g. "\+---\+---\+", then every row above the separator will be in the header and every row below will be in the body.
+ * **Hard Rule**: A line consisting of 3+ `-` defines a hard rule.
+ * **Table**: A `|`character at the beginning of a line begins a table row, consisting of table cells separated by `|` characters.
+The cells are themselves blocks, and as such can contain newlines. The rows are terminated by a `|` followed by a newline.
+By default the table has only a body, but if rows are separated by an alternating string of `+` and multiple `-` characters,
+e.g. `\+---\+---\+`, then every row above the separator will be in the header and every row below will be in the body.
 Optionally the table may start and end with such a separator as well.
 
 #### Inline Nodes
@@ -116,11 +116,11 @@ Despite the name, inline nodes can span multiple lines, e.g. to accomodate line 
 
 The following inline node types are supported:
  * **Plaintext**: The default inline type; any text not in another inline node is plaintext. Rendered verbatim.
- * **Italic**: Surrounding text with "\*" *italicizes* it. Italic nodes can contain any other type of inline node.
- * **Bold**: Surrounding text with "\*\*" **bolds** it. Bold nodes can contain any other type of inline node.
- * **Code**: Surrounding text with "\`" renders it as `code`. The content is rendered verbatim.
- * **Link**: A [link](#) is written as "\[*text*\]\(*href*\)". The *text* portion can contain any other type of inline node.
-The *href* portion is the link destination, and is parsed verbatim except that any literal "\(" or "\)" must be escaped.
+ * **Italic**: Surrounding text with `*` *italicizes* it. Italic nodes can contain any other type of inline node.
+ * **Bold**: Surrounding text with `**` **bolds** it. Bold nodes can contain any other type of inline node.
+ * **Code**: Surrounding text with `\`` renders it as `code`. The content is rendered verbatim.
+ * **Link**: A [link](#) is written as \[*text*\]\(*href*\). The *text* portion can contain any other type of inline node.
+The *href* portion is the link destination, and is parsed verbatim except that any literal `(` or `)` must be escaped.
  * **Footnote Reference**: Writing \^\[*footnote-name*\] defines a footnote reference.
 It is rendered as a superscript footnote number^[footnote-numbering], and links to the footnote named *footnote-name*
 if it is present in the footer.
