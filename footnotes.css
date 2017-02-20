@@ -8,6 +8,11 @@
 }
 
 .inline-footnote {
-    margin: 1em;
-    color: #555;
+    margin: .5em;
+    padding: .5em;
+    border-left: 2px solid #555;
+}
+
+.inline-footnote > p {
+    margin: 0;
 }
