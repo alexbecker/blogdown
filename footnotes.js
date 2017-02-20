@@ -1,9 +1,10 @@
 function inlineFootnote(footnote) {
     var ref = document.getElementById("a-" + footnote.id);
     var inline = document.createElement("div");
-    for (var i=0; i<footnote.children.length; i++) {
+    for (var i=0; i<footnote.children.length;) {
         var child = footnote.children[i];
         if (child.tagName == "A" && child.getAttribute("href") == "#" + ref.id) {
+            i++;
             continue;
         }
         inline.appendChild(child);
