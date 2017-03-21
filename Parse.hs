@@ -27,7 +27,7 @@ firstCharSpecials = " \t#~+\n" ++ specials
 -- Parse a single non-special character, allowing for escaping and continuation.
 nonSpecial :: String -> Parser Char
 nonSpecial specialSet = do
-    escape <- optionMaybe $ char '\\'
+    escape <- (optionMaybe $ char '\\') <?> ""  -- Suppress error message, since we never "expect" escape character.
     if isJust escape
         then do
             optional $ char '\n'
@@ -87,7 +87,7 @@ withModifiedState p modifier = do
 
 escapableNoneOf :: String -> Parser Char
 escapableNoneOf blacklist = do
-    escape <- optionMaybe $ char '\\'
+    escape <- (optionMaybe $ char '\\') <?> ""  -- Suppress error message, since we never "expect" escape character.
     c <- if isJust escape
         then anyChar
         else noneOf blacklist
@@ -148,21 +148,26 @@ inlineParsers parserNames = map snd $ filter (\(k,v) -> elem k parserNames)
 internalParser :: String -> [String] -> Parser [Inline]
 internalParser parentName parserNames = many1 $ choice $ inlineParsers $ delete parentName parserNames
 
+-- Like [between], but with more helpful error messages on failure.
+betweenWithErrors :: String -> String -> String -> Parser a -> Parser a
+betweenWithErrors open close name = between
+    (string' open <?> "\"" ++ open ++ "\" (" ++ name ++ ")")
+    (string' close <?> "closing \"" ++ close ++ "\" (" ++ name ++ ")")
+
 -- The bold and italics parsers are tricky because they both use the same special character.
 -- As a result, both need "try" so they do not step on each other.
 bold :: [String] -> Parser Inline
 bold parserNames = fmap Bold $ try $ between (string' "**") (try $ string' "**") $ internalParser "bold" parserNames
 
 italics :: [String] -> Parser Inline
-italics parserNames = fmap Italics $ try $ between (char' '*') (char' '*') $ internalParser "italics" parserNames
+italics parserNames = fmap Italics $ try $ betweenWithErrors "*" "*" "italics" $ internalParser "italics" parserNames
 
 code :: Parser Inline
-code = fmap Code $ between (char' '`') (char' '`') $ many1 $ escapableNoneOf "`"
+code = fmap Code $ betweenWithErrors "`" "`" "code" $ many1 $ escapableNoneOf "`"
 
 footnoteRef :: Parser Inline
 footnoteRef = do
-    char '^'
-    identifier <- between (char' '[') (char' ']') $ many1 $ escapableNoneOf "[]"
+    identifier <- betweenWithErrors "^[" "]" "footnote reference" $ many1 $ escapableNoneOf "[]"
     state <- getState
     let f = footnoteIndices state
     let maybeIndex = M.lookup identifier f
@@ -176,31 +181,34 @@ footnoteRef = do
 
 link :: [String] -> Parser Inline
 link parserNames = do
-    text <- between (char' '[') (char' ']') $ internalParser "link" parserNames
-    href <- between (char' '(') (char' ')') $ many $ escapableNoneOf "()"
+    text <- betweenWithErrors "[" "]" "link text" $ internalParser "link" parserNames
+    href <- betweenWithErrors "(" ")" "link href" $ many $ escapableNoneOf "()"
     return $ Link {text=text, href=href}
 
 inline :: Parser Inline
 inline = choice $ inlineParsers ["bold", "italics", "code", "footnoteRef", "link", "inlineHtml", "plaintext"]
 
 hardRule :: Parser Block
-hardRule = try (string "---") >> many (char '-') >> many1 (char '\n') >> return HardRule
+hardRule = do
+    try (string "---") <?> "\"---\" (hard rule)"
+    many (char '-')
+    many1 (char '\n')
+    return HardRule
 
 paragraph :: Parser Block
 paragraph = fmap Paragraph $ many1 inline
 
 header :: Parser Block
 header = do
-    hashes <- many1 $ char' '#'
+    hashes <- (many1 $ char' '#') <?> "\"#\" (header)"
     many1 $ oneOf " \t"
     text <- many1 inline
     return $ Header (length hashes) text
 
 listItem :: Bool -> Parser ListItem
 listItem ordered = fmap (ListItem ordered) $ do
-    let identifier = if ordered then " -" else " *"
-    try $ string' identifier
-    many1 $ oneOf " \t"
+    let identifier = if ordered then " - " else " * "
+    (try $ string' identifier) <?> ("\"" ++ identifier ++ "\" (list item)")
     many1 $ inline
 
 orderedList :: Parser Block
@@ -209,13 +217,19 @@ orderedList = fmap OrderedList $ many1 $ listItem True
 unorderedList :: Parser Block
 unorderedList = fmap UnorderedList $ many1 $ listItem False
 
+blockQuoteLineStart :: Parser String
+blockQuoteLineStart = try (string "> ") <?> "\"> \" (blockquote)"
+
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ do
-    string "> "
-    withModifiedState (many1 inline) $ \s -> s {prevCharIsNewline=False, skipPrefix=(string "> " >> many (char ' '))}
+    blockQuoteLineStart
+    withModifiedState (many1 inline) $ \s -> s {prevCharIsNewline=False, skipPrefix=(blockQuoteLineStart >> many (char ' '))}
+
+blockCodeLineStart :: Parser String
+blockCodeLineStart = try (string "\t" <|> string "    ") <?> "\"    \" or tab (code block)"
 
 blockCode :: Parser Block
-blockCode = fmap (BlockCode . unlines) $ many1 $ (string "\t" <|> string "    ") >> manyTill (noneOf "\n") (char' '\n')
+blockCode = fmap (BlockCode . unlines) $ many1 $ blockCodeLineStart >> manyTill (noneOf "\n") (char' '\n')
 
 blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
@@ -255,8 +269,7 @@ block = (many $ char '\n') >> choice [blockHtml, hardRule, header, orderedList, 
 footnoteDef :: Parser FootnoteDef
 footnoteDef = do
     many $ char '\n'
-    char '~'
-    identifier <- between (char' '[') (char' ']') $ many1 $ escapableNoneOf "[]"
+    identifier <- betweenWithErrors "~[" "]" "footnote definition" $ many1 $ escapableNoneOf "[]"
     state <- getState
     let maybeIndex = M.lookup identifier $ footnoteIndices state
     index <- if isNothing maybeIndex
@@ -274,4 +287,5 @@ ast :: Parser AST
 ast = do
     blocks <- many block
     footnotes <- optionMaybe footnoteDefs
+    eof
     return $ AST blocks footnotes
