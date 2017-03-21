@@ -33,7 +33,7 @@ data Block = HardRule
            | BlockCode String
            | BlockHtml Html
            | Table {
-    head :: Maybe [TableRow],
+    thead :: Maybe [TableRow],
     body :: [TableRow]
 }
     deriving (Show)
