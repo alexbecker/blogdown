@@ -24,17 +24,42 @@ initialState = ParserState{
 specials = "*`^<>[]|\\"
 firstCharSpecials = " \t#~+\n" ++ specials
 
-nonSpecial :: Parser Char
-nonSpecial = do
-    state <- getState
+-- Parse a single non-special character, allowing for escaping.
+nonSpecial :: String -> Parser Char
+nonSpecial specialSet = do
     escape <- optionMaybe $ char '\\'
-    c <- if isJust escape
+    if isJust escape
         then anyChar
-        else if prevCharIsNewline state
-            then skipPrefix state >> noneOf firstCharSpecials
-            else noneOf specials
-    putState $ state {prevCharIsNewline=(c == '\n')}
-    return c
+        else noneOf specialSet
+
+-- Parse one or more non-special characters, allowing for escaping and incorporating the
+-- rules for special characters at the start of a line. Note that this does not consume
+-- as many non-special characters as possible, for ease of implementation.
+nonSpecials :: Parser String
+nonSpecials = do
+    state <- getState
+    str <- if prevCharIsNewline state
+        then do
+            s <- skipPrefix state
+            if null s
+                then do
+                    c <- nonSpecial firstCharSpecials
+                    return [c]
+                else return s
+        else do
+            s <- many $ nonSpecial ('\n' : specials)
+            c <- optionMaybe $ char '\n'
+            if isJust c
+                then return (s ++ "\n")
+                else if null s
+                    then fail "first character is special"
+                    else return s
+    putState $ state {prevCharIsNewline=(last str == '\n')}
+    return str
+
+-- Parse as many non-special characters as possible.
+plaintext :: Parser String
+plaintext = fmap concat $ many1 nonSpecials
 
 char' :: Char -> Parser Char
 char' c = if c == '\n'
@@ -57,9 +82,6 @@ withModifiedState p modifier = do
     result <- p
     putState state
     return result
-
-plaintext :: Parser String
-plaintext = many1 nonSpecial
 
 escapableNoneOf :: String -> Parser Char
 escapableNoneOf blacklist = do
@@ -108,6 +130,9 @@ attr = do
 attrVal :: Parser String
 attrVal = between (char '"') (char '"') (many $ noneOf "\"")
 
+-- Some inline parsers are not allowed to nest, and so we use a registry of all inline
+-- parsers combined with the [internalParser] to nest the various internal parsers
+-- appropriately.
 inlineParsers :: [String] -> [Parser Inline]
 inlineParsers parserNames = map snd $ filter (\(k,v) -> elem k parserNames)
     [("bold", bold parserNames),
@@ -185,7 +210,7 @@ unorderedList = fmap UnorderedList $ many1 $ listItem False
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ do
     string "> "
-    withModifiedState (many1 inline) $ \s -> s {prevCharIsNewline=False, skipPrefix=string "> "}
+    withModifiedState (many1 inline) $ \s -> s {prevCharIsNewline=False, skipPrefix=(string "> " >> many (char ' '))}
 
 blockCode :: Parser Block
 blockCode = fmap (BlockCode . unlines) $ many1 $ (string "\t" <|> string "    ") >> manyTill (noneOf "\n") (char' '\n')

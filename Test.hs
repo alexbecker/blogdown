@@ -76,6 +76,13 @@ testBlockQuote = expectSuccess "blockquote" blockQuote
     \> he would fix the economy.\n"
     "<blockquote>The politician said that\n\
     \he would fix the economy.</blockquote>"
+testBlockQuotePreFormatted = expectSuccess "blockquote pre-formatted" blockQuote
+    ">     \"This is it... this is where I belong...\"\n\
+    \>     I know everyone here... even if I've never met them, never talked to\n\
+    \> them, may never hear from them again... I know you all...\n"
+    "<blockquote>    \"This is it... this is where I belong...\"\n\
+    \    I know everyone here... even if I've never met them, never talked to\n\
+    \them, may never hear from them again... I know you all...</blockquote>"
 testBlockCode = expectSuccess "block code" blockCode
     "    var x = 0;\n\
     \    alert(x);\n"
@@ -231,6 +238,7 @@ main = do
     testOrderedList
     testUnorderedList
     testBlockQuote
+    testBlockQuotePreFormatted
     testBlockCode
     testBlockCodeWhitespace
     testBlockCodeSpecialChars
