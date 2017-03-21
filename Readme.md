@@ -131,6 +131,11 @@ A Blogdown document may optionally include a footer after the body.
 The footer consists of a sequence of *footnote definitions*, each of which begins on a new line with \~\[*footnote-name*\] and consists of an arbitrary sequence of blocks.
 A footnote definition is only terminated by another footnote definition or the end of the document.
 
+### Escaping
+
+Any character (special or not) can be escaped with `\\`. For a literal backslash, use `\\\\`.
+A backslash before a newline acts as a continuation character.
+
 ## Planned improvements
  * Nested lists
  * Better error messages on parse failures
@@ -138,7 +143,6 @@ A footnote definition is only terminated by another footnote definition or the e
  * Better tests
  * Document building & running tests
  * Comments
- * Continuation character
 
 ---
 

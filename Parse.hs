@@ -24,12 +24,14 @@ initialState = ParserState{
 specials = "*`^<>[]|\\"
 firstCharSpecials = " \t#~+\n" ++ specials
 
--- Parse a single non-special character, allowing for escaping.
+-- Parse a single non-special character, allowing for escaping and continuation.
 nonSpecial :: String -> Parser Char
 nonSpecial specialSet = do
     escape <- optionMaybe $ char '\\'
     if isJust escape
-        then anyChar
+        then do
+            optional $ char '\n'
+            anyChar
         else noneOf specialSet
 
 -- Parse one or more non-special characters, allowing for escaping and incorporating the

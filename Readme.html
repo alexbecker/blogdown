@@ -104,6 +104,9 @@ if it is present in the footer.</li>
 <p>A Blogdown document may optionally include a footer after the body.
 The footer consists of a sequence of <i>footnote definitions</i>, each of which begins on a new line with ~[<i>footnote-name</i>] and consists of an arbitrary sequence of blocks.
 A footnote definition is only terminated by another footnote definition or the end of the document.</p>
+<h3>Escaping</h3>
+<p>Any character (special or not) can be escaped with <code>\</code>. For a literal backslash, use <code>\\</code>.
+A backslash before a newline acts as a continuation character.</p>
 <h2>Planned improvements</h2>
 <ul><li>Nested lists</li>
 <li>Better error messages on parse failures</li>
@@ -111,7 +114,6 @@ A footnote definition is only terminated by another footnote definition or the e
 <li>Better tests</li>
 <li>Document building & running tests</li>
 <li>Comments</li>
-<li>Continuation character</li>
 </ul>
 <hr/>
 <ol start="0" class="footnotes"><li id="-footnote-0"><p>Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.

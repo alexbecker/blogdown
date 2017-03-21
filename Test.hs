@@ -189,6 +189,9 @@ testFootnoteOrdering = expectSuccess "footnotes should be sorted by first refere
     \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>a</p></li>\n\
     \<li id=\"-footnote-1\"><p>b</p></li>\n\
     \</ol>\n"
+testContinuation = expectSuccess "continuation character" paragraph
+    "a\\\nb"
+    "<p>ab</p>"
 
 expectFailure :: String -> (Parser a) -> String -> IO ()
 expectFailure name p input = either
@@ -250,6 +253,7 @@ main = do
     testFootnoteDef
     testFootnoteDefs
     testFootnoteOrdering
+    testContinuation
     testNestedBold
     testNestedLink
     testUnclosedTag
