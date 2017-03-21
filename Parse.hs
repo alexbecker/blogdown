@@ -151,16 +151,19 @@ internalParser parentName parserNames = many1 $ choice $ inlineParsers $ delete 
 -- Like [between], but with more helpful error messages on failure.
 betweenWithErrors :: String -> String -> String -> Parser a -> Parser a
 betweenWithErrors open close name = between
-    (string' open <?> "\"" ++ open ++ "\" (" ++ name ++ ")")
-    (string' close <?> "closing \"" ++ close ++ "\" (" ++ name ++ ")")
+    (try (string' open) <?> "\"" ++ open ++ "\" (" ++ name ++ ")")
+    (try (string' close) <?> "closing \"" ++ close ++ "\" (" ++ name ++ ")")
+
+bold :: [String] -> Parser Inline
+bold parserNames = fmap Bold $ betweenWithErrors "**" "**" "bold" $ internalParser "bold" parserNames
 
 -- The bold and italics parsers are tricky because they both use the same special character.
--- As a result, both need "try" so they do not step on each other.
-bold :: [String] -> Parser Inline
-bold parserNames = fmap Bold $ try $ between (string' "**") (try $ string' "**") $ internalParser "bold" parserNames
-
+-- As a result, [italics] needs to look ahead to avoid stepping on [bold].
 italics :: [String] -> Parser Inline
-italics parserNames = fmap Italics $ try $ betweenWithErrors "*" "*" "italics" $ internalParser "italics" parserNames
+italics parserNames = fmap Italics $ try $ between
+    ((char' '*' >> lookAhead (noneOf "*")) <?> "\"*\" (italics)")
+    (char' '*' <?> "closing \"*\" (italics)")
+    $ internalParser "italics" parserNames
 
 code :: Parser Inline
 code = fmap Code $ betweenWithErrors "`" "`" "code" $ many1 $ escapableNoneOf "`"
