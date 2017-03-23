@@ -26,13 +26,13 @@ firstCharSpecials = " \t#~+\n" ++ specials
 
 -- Parse a single non-special character, allowing for escaping and continuation.
 nonSpecial :: String -> Parser Char
-nonSpecial specialSet = do
+nonSpecial blacklist = do
     escape <- (optionMaybe $ char '\\') <?> ""  -- Suppress error message, since we never "expect" escape character.
     if isJust escape
         then do
-            optional $ char '\n'
+            optional $ char '\n'    -- continuation
             anyChar
-        else noneOf specialSet
+        else noneOf blacklist
 
 -- Parse one or more non-special characters, allowing for escaping and incorporating the
 -- rules for special characters at the start of a line. Note that this does not consume
@@ -50,11 +50,11 @@ nonSpecials = do
                 else return s
         else do
             s <- many $ nonSpecial ('\n' : specials)
-            c <- optionMaybe $ char '\n'
+            c <- (optionMaybe $ char '\n') <?> "" -- Suppress error message, since we never "expect" newline in the middle of text.
             if isJust c
                 then return (s ++ "\n")
                 else if null s
-                    then fail "first character is special"
+                    then fail ""    -- Don't succeed without consuming any input.
                     else return s
     putState $ state {prevCharIsNewline=(last str == '\n')}
     return str
@@ -96,12 +96,16 @@ escapableNoneOf blacklist = do
 
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
-    if tagType == Close then string "</" else string "<"
+    if tagType == Close
+        then try (string "</") <?> "\"</\" (closing html tag)"
+        else string "<" <?> "\"<\" (html tag)"
     spaces
-    tagname <- many1 letter
+    tagname <- many1 letter <?> "html tag name"
     spaces
     attrs <- sepEndBy attr spaces
-    if tagType == SelfClosing then string "/>" else string ">"
+    if tagType == SelfClosing
+        then try (string "/>") <?> "closing \"/>\" (self-closing html tag)"
+        else string ">" <?> "closing \">\" (html tag)"
     return $ HtmlTag {tagname=tagname, attrs=attrs}
 
 htmlContent :: Parser (Either String Html)
@@ -119,18 +123,20 @@ pairTag = do
 singleTag :: Parser Html
 singleTag = fmap SingleTag $ htmlTag SelfClosing
 
+-- TODO: consider eliminating arbitrary-length backtracking on [singleTag]
+-- by limiting tag name length and checking against self-closing tag names.
 html :: Parser Html
-html = try pairTag <|> singleTag
+html = try singleTag <|> pairTag
 
 attr :: Parser Attr
 attr = do
-    name <- many1 letter
+    name <- many1 letter <?> "html attribute name"
     char '='
     val <- attrVal
     return $ Attr name val
 
 attrVal :: Parser String
-attrVal = between (char '"') (char '"') (many $ noneOf "\"")
+attrVal = betweenWithErrors "\"" "\"" "html attribute value" (many $ noneOf "\"")
 
 -- Some inline parsers are not allowed to nest, and so we use a registry of all inline
 -- parsers combined with the [internalParser] to nest the various internal parsers
@@ -158,10 +164,9 @@ bold :: [String] -> Parser Inline
 bold parserNames = fmap Bold $ betweenWithErrors "**" "**" "bold" $ internalParser "bold" parserNames
 
 -- The bold and italics parsers are tricky because they both use the same special character.
--- As a result, [italics] needs to look ahead to avoid stepping on [bold].
 italics :: [String] -> Parser Inline
-italics parserNames = fmap Italics $ try $ between
-    ((char' '*' >> lookAhead (noneOf "*")) <?> "\"*\" (italics)")
+italics parserNames = fmap Italics $ between
+    ((try (char' '*' >> lookAhead (noneOf "*"))) <?> "\"*\" (italics)")
     (char' '*' <?> "closing \"*\" (italics)")
     $ internalParser "italics" parserNames
 
@@ -237,18 +242,13 @@ blockCode = fmap (BlockCode . unlines) $ many1 $ blockCodeLineStart >> manyTill 
 blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
 
-tableCellSeparator :: Parser Char
-tableCellSeparator = try $ do
-    char' '|'
-    lookAhead $ noneOf "\n"
-
 -- Does not return TableRow because we don't know what type the cells are until the whole table is parsed.
 tableRow :: Parser [[Inline]]
-tableRow = manyTill (char' '|' >> many1 inline) (try $ string' "|\n")
+tableRow = manyTill ((char' '|' <?> "\"|\" (table cell)") >> many1 inline) (try $ string' "|\n")
 
 tableSeparator :: Parser ()
 tableSeparator = optional $ do
-    sepBy1 (char '+') (optionMaybe (char ' ') >> many1 (char '-') >> optionMaybe (char ' '))
+    sepBy1 (char '+' <?> "\"+\" (table)") (optionMaybe (char ' ') >> many1 (char '-') >> optionMaybe (char ' '))
     char' '\n'
 
 table :: Parser Block
