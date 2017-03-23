@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Either
+import Data.String.Utils
 import Text.Parsec
 import Text.Parsec.Error
 
@@ -193,16 +194,36 @@ testContinuation = expectSuccess "continuation character" paragraph
     "a\\\nb"
     "<p>ab</p>"
 
-expectFailure :: String -> (Parser a) -> String -> IO ()
-expectFailure name p input = either
-    (const $ putStrLn $ "PASS: " ++ name)
+expectFailure :: String -> (Parser a) -> String -> String -> IO ()
+expectFailure name p input expectedErr = either
+    (\err -> if endswith expectedErr $ show err
+        then putStrLn $ "PASS: " ++ name
+        else do
+            putStrLn $ "FAIL: " ++ name
+            putStrLn "in:"
+            putStrLn input
+            putStrLn "out:"
+            putStrLn $ show err
+            putStrLn "expect:"
+            putStrLn expectedErr)
     (const $ putStrLn $ "FAIL: " ++ name)
     $ runParser p Parse.initialState name input
 
-testNestedBold = expectFailure "bold tags cannot be nested" inline "****abc****"
-testNestedLink = expectFailure "links cannot be nested" inline "[[a](https://a.com)](https://b.com)"
-testUnclosedTag = expectFailure "unclosed tag should fail to parse" html "<p>hello"
-testMismatchedTags = expectFailure "mismatched tags should fail to parse" html "<a>hello</b>"
+testNestedBold = expectFailure "bold tags cannot be nested" inline
+    "****abc****"
+    "unexpected \"*\"\n\
+    \expecting \"*\" (italics)"
+testNestedLink = expectFailure "links cannot be nested" inline
+    "[[a](https://a.com)](https://b.com)"
+    "unexpected \"[\"\n\
+    \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference) or \"<\" (html tag)"
+testUnclosedTag = expectFailure "unclosed tag should fail to parse" html
+    "<p>hello"
+    "unexpected end of input\n\
+    \expecting \"<\" (html tag) or \"</\" (closing html tag)"
+testMismatchedTags = expectFailure "mismatched tags should fail to parse" html
+    "<a>hello</b>"
+    "mismatched tags: 'a' and 'b'"
 
 goldenTest :: FilePath -> FilePath -> String -> IO ()
 goldenTest inFilePath goldenFilePath renderArgs = do
