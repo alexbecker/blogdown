@@ -25,7 +25,9 @@ printExpectedSuccess name input expected parsed = if output == expected
 
 expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO ()
 expectSuccess name p input expected = either
-    ((flip const (putStrLn $ "FAIL: " ++ name) >> putStrLn) . show)
+    (\err -> do
+        putStrLn $ "FAIL: " ++ name
+        putStrLn $ show err)
     (printExpectedSuccess name input expected)
     $ runParser p Parse.initialState name input
 
