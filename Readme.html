@@ -19,7 +19,7 @@ With full compatability out of the window, I have chosen to make some other smal
 <h2>Installation</h2>
 <p>Blogdown requires <a href="https://www.haskell.org/ghc/">GHC</a>, <a href="https://hackage.haskell.org/package/parsec">Parsec</a> and <a href="https://hackage.haskell.org/package/MissingH">MissingH</a> to compile,
 all of which are available through common Linux package managers.
-Once these are installed, run <code>ghc -o Blogdown Blogdown.hs</code> in the repository's base directory.</p>
+Once these are installed, run <code>ghc -isrc -o Blogdown src/Blogdown.hs</code> in the repository's base directory.</p>
 <h2>Usage</h2>
 <p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
 <pre><code>cat blogpost.md | ./Blogdown &gt; blogpost.html

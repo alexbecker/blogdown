@@ -1,4 +1,4 @@
-module Render where
+module Rendering.Render where
 
 import Control.Monad.State.Lazy
 import Data.List
@@ -9,19 +9,19 @@ import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 
 import AST
-import RenderOptions
+import Rendering.RenderOptions
 
 class ToHtml a where
     toHtml :: RenderOptions -> a -> String
 
 optionalJS :: RenderOptions -> String
 optionalJS r = if (inlineJS r)
-    then "<script>" ++ (unsafePerformIO $ readFile "footnotes.js") ++ "</script>\n"
+    then "<script>" ++ (unsafePerformIO $ readFile "assets/footnotes.js") ++ "</script>\n"
     else ""
 
 optionalCSS :: RenderOptions -> String
 optionalCSS r = if (inlineCSS r)
-    then "<style>" ++ (unsafePerformIO $ readFile "footnotes.css") ++ "</style>\n"
+    then "<style>" ++ (unsafePerformIO $ readFile "assets/footnotes.css") ++ "</style>\n"
     else ""
 
 instance ToHtml AST where

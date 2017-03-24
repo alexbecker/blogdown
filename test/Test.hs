@@ -5,9 +5,9 @@ import Data.String.Utils
 import Text.Parsec
 import Text.Parsec.Error
 
-import Parse
-import Render
-import RenderOptions
+import Parsing.Parse
+import Rendering.Render
+import Rendering.RenderOptions
 
 printExpectedSuccess :: (ToHtml a) => String -> String -> String -> a -> IO ()
 printExpectedSuccess name input expected parsed = if output == expected
@@ -29,7 +29,7 @@ expectSuccess name p input expected = either
         putStrLn $ "FAIL: " ++ name
         putStrLn $ show err)
     (printExpectedSuccess name input expected)
-    $ runParser p Parse.initialState name input
+    $ runParser p initialState name input
 
 testItalics = expectSuccess "italics" inline "*abc*" "<i>abc</i>"
 testBold = expectSuccess "bold" inline "**abc**" "<b>abc</b>"
@@ -209,7 +209,7 @@ expectFailure name p input expectedErr = either
             putStrLn "expect:"
             putStrLn expectedErr)
     (const $ putStrLn $ "FAIL: " ++ name)
-    $ runParser p Parse.initialState name input
+    $ runParser p initialState name input
 
 testNestedBold = expectFailure "bold tags cannot be nested" inline
     "****abc****"
@@ -249,7 +249,7 @@ goldenTest inFilePath goldenFilePath renderArgs = do
                     let failPath = goldenFilePath ++ ".fail"
                     writeFile failPath rendered
                     putStrLn $ "FAIL: " ++ goldenFilePath)
-        $ runParser ast Parse.initialState inFilePath input
+        $ runParser ast initialState inFilePath input
 
 main :: IO ()
 main = do
@@ -291,7 +291,7 @@ main = do
     testUnclosedTag
     testMismatchedTags
     goldenTest "Readme.md" "Readme.html" "--em-dashes --inline-css --inline-js"
-    goldenTest "goldens/golden1.md" "goldens/golden1.html" "--em-dashes"
-    goldenTest "goldens/golden1.md" "goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks"
-    goldenTest "goldens/golden2.md" "goldens/golden2.html" "--em-dashes"
-    goldenTest "goldens/golden2.md" "goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks"
+    goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes"
+    goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks"
+    goldenTest "test/goldens/golden2.md" "test/goldens/golden2.html" "--em-dashes"
+    goldenTest "test/goldens/golden2.md" "test/goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks"

@@ -23,7 +23,7 @@ With full compatability out of the window, I have chosen to make some other smal
 
 Blogdown requires [GHC](https://www.haskell.org/ghc/), [Parsec](https://hackage.haskell.org/package/parsec) and [MissingH](https://hackage.haskell.org/package/MissingH) to compile,
 all of which are available through common Linux package managers.
-Once these are installed, run `ghc -o Blogdown Blogdown.hs` in the repository's base directory.
+Once these are installed, run `ghc -isrc -o Blogdown src/Blogdown.hs` in the repository's base directory.
 
 ## Usage
 

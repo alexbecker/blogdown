@@ -1,4 +1,4 @@
-module RenderOptions where
+module Rendering.RenderOptions where
 
 import System.Environment
 

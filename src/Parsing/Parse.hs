@@ -1,4 +1,4 @@
-module Parse where
+module Parsing.Parse where
 
 import Data.List
 import Data.Maybe
