@@ -26,10 +26,13 @@ initialState = ParserState{
 specials = "*`^<>[]|\\"
 firstCharSpecials = " \t#~+\n" ++ specials
 
+suppressErr :: Parser a -> Parser a
+suppressErr p = p <?> ""
+
 -- Parse a single non-special character, allowing for escaping and continuation.
 nonSpecial :: String -> Parser Char
 nonSpecial blacklist = do
-    escape <- (optionMaybe $ char '\\') <?> ""  -- Suppress error message, since we never "expect" escape character.
+    escape <- suppressErr (optionMaybe $ char '\\')
     if isJust escape
         then do
             optional $ char '\n'    -- continuation
@@ -52,7 +55,7 @@ nonSpecials = do
                 else return s
         else do
             s <- many $ nonSpecial ('\n' : specials)
-            c <- (optionMaybe $ char '\n') <?> "" -- Suppress error message, since we never "expect" newline in the middle of text.
+            c <- suppressErr (optionMaybe $ char '\n')
             if isJust c
                 then return (s ++ "\n")
                 else if null s
@@ -89,7 +92,7 @@ withModifiedState p modifier = do
 
 escapableNoneOf :: String -> Parser Char
 escapableNoneOf blacklist = do
-    escape <- (optionMaybe $ char '\\') <?> ""  -- Suppress error message, since we never "expect" escape character.
+    escape <- suppressErr (optionMaybe $ char '\\')
     c <- if isJust escape
         then anyChar
         else noneOf blacklist
@@ -147,7 +150,7 @@ betweenWithErrors open close name = between
     (try (string' close) <?> "closing \"" ++ close ++ "\" (" ++ name ++ ")")
 
 nestedBold :: Parser Inline
-nestedBold = (try (string "****") <?> "") >> fail "cannot have empty or nested bold nodes"
+nestedBold = suppressErr (try (string "****")) >> fail "cannot have empty or nested bold nodes"
 
 failWithIf :: String -> Bool -> Parser ()
 failWithIf msg cond = if cond then fail msg else return ()
@@ -171,7 +174,7 @@ italics = do
     let currentParserStack = inlineParserStack state
     failIf $ elem "italics" currentParserStack
     s <- between
-        (try ((char' '*' <?> "\"*\" (italics)") >> (notFollowedBy (char '*') <?> "")))
+        (try ((char' '*' <?> "\"*\" (italics)") >> suppressErr (notFollowedBy (char '*'))))
         (char' '*' <?> "closing \"*\" (italics)")
         ((withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("italics" : currentParserStack)}) <?>
             if elem "bold" currentParserStack
