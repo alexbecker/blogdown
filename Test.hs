@@ -214,6 +214,9 @@ expectFailure name p input expectedErr = either
 testNestedBold = expectFailure "bold tags cannot be nested" inline
     "****abc****"
     "cannot have empty or nested bold nodes"
+testMismatchedBoldItalics = expectFailure "bold opening tag closed with italics tag" inline
+    "**a*"
+    "expecting content in italics node or extra \"*\" to close bold node"
 testSwappedItalicsBold = expectFailure "italics and bold closing tags swapped" paragraph
     "*a**b*c**"
     "unexpected \"c\"\n\
@@ -282,6 +285,8 @@ main = do
     testFootnoteOrdering
     testContinuation
     testNestedBold
+    testMismatchedBoldItalics
+    testSwappedItalicsBold
     testNestedLink
     testUnclosedTag
     testMismatchedTags

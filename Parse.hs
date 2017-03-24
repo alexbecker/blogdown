@@ -149,17 +149,17 @@ betweenWithErrors open close name = between
 nestedBold :: Parser Inline
 nestedBold = (try (string "****") <?> "") >> fail "cannot have empty or nested bold nodes"
 
+failWithIf :: String -> Bool -> Parser ()
+failWithIf msg cond = if cond then fail msg else return ()
+
+failIf :: Bool -> Parser ()
+failIf = failWithIf ""
+
 bold :: Parser Inline
 bold = do
     state <- getState
     let currentParserStack = inlineParserStack state
-    lookAhead (try (string "**") <?>
-        if elem "bold" currentParserStack
-            then "" -- If we're already in a bold block, suppress the error message.
-            else "\"**\" (bold)")
-    if elem "bold" currentParserStack
-        then fail "bold nodes cannot be nested"
-        else return ()
+    failIf $ elem "bold" currentParserStack
     s <- betweenWithErrors "**" "**" "bold"
         $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("bold" : currentParserStack)}
     return $ Bold s
@@ -169,19 +169,14 @@ italics :: Parser Inline
 italics = do
     state <- getState
     let currentParserStack = inlineParserStack state
-    lookAhead $ (char '*' <?>   -- This would catch both italics and bold, but bold has higher precedence so it's ok.
-        if elem "italics" currentParserStack
-            then ""
-            else "\"*\" (italics)")
-    if elem "italics" currentParserStack
-        then fail "italic nodes cannot be nested"
-        else return ()
+    failIf $ elem "italics" currentParserStack
     s <- between
-        (try $ do
-            char' '*' <?> "\"*\" (italics)"
-            notFollowedBy (char '*') <?> "single \"*\" (italics) instead of \"**\" (bold)")
+        (try ((char' '*' <?> "\"*\" (italics)") >> (notFollowedBy (char '*') <?> "")))
         (char' '*' <?> "closing \"*\" (italics)")
-        $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("italics" : currentParserStack)}
+        ((withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("italics" : currentParserStack)}) <?>
+            if elem "bold" currentParserStack
+                then "content in italics node or extra \"*\" to close bold node"
+                else "content in italics node")
     return $ Italics s
 
 code :: Parser Inline
