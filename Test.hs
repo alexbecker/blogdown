@@ -211,12 +211,16 @@ expectFailure name p input expectedErr = either
 
 testNestedBold = expectFailure "bold tags cannot be nested" inline
     "****abc****"
-    "unexpected \"*\"\n\
-    \expecting \"*\" (italics)"
+    "cannot have empty or nested bold nodes"
+testSwappedItalicsBold = expectFailure "italics and bold closing tags swapped" paragraph
+    "*a**b*c**"
+    "unexpected \"c\"\n\
+    \expecting closing \"**\" (bold)"
 testNestedLink = expectFailure "links cannot be nested" inline
     "[[a](https://a.com)](https://b.com)"
     "unexpected \"[\"\n\
-    \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference) or \"<\" (html tag)"
+    \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference) or \"<\" (html tag)\n\
+    \links cannot be nested"
 testUnclosedTag = expectFailure "unclosed tag should fail to parse" html
     "<p>hello"
     "unexpected end of input\n\

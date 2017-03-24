@@ -11,6 +11,7 @@ import AST
 data ParserState = ParserState {
     prevCharIsNewline :: Bool,
     skipPrefix :: Parser String,
+    inlineParserStack :: [String],
     footnoteIndices :: M.Map String Int
 }
 type Parser = Parsec String ParserState
@@ -18,6 +19,7 @@ type Parser = Parsec String ParserState
 initialState = ParserState{
     prevCharIsNewline=False,
     skipPrefix=string "",
+    inlineParserStack=[],
     footnoteIndices=M.fromList []
 }
 
@@ -138,37 +140,49 @@ attr = do
 attrVal :: Parser String
 attrVal = betweenWithErrors "\"" "\"" "html attribute value" (many $ noneOf "\"")
 
--- Some inline parsers are not allowed to nest, and so we use a registry of all inline
--- parsers combined with the [internalParser] to nest the various internal parsers
--- appropriately.
-inlineParsers :: [String] -> [Parser Inline]
-inlineParsers parserNames = map snd $ filter (\(k,v) -> elem k parserNames)
-    [("bold", bold parserNames),
-     ("italics", italics parserNames),
-     ("code", code),
-     ("footnoteRef", footnoteRef),
-     ("link", link parserNames),
-     ("inlineHtml", fmap InlineHtml html),
-     ("plaintext", fmap Plaintext plaintext)]
-
-internalParser :: String -> [String] -> Parser [Inline]
-internalParser parentName parserNames = many1 $ choice $ inlineParsers $ delete parentName parserNames
-
 -- Like [between], but with more helpful error messages on failure.
 betweenWithErrors :: String -> String -> String -> Parser a -> Parser a
 betweenWithErrors open close name = between
     (try (string' open) <?> "\"" ++ open ++ "\" (" ++ name ++ ")")
     (try (string' close) <?> "closing \"" ++ close ++ "\" (" ++ name ++ ")")
 
-bold :: [String] -> Parser Inline
-bold parserNames = fmap Bold $ betweenWithErrors "**" "**" "bold" $ internalParser "bold" parserNames
+nestedBold :: Parser Inline
+nestedBold = (try (string "****") <?> "") >> fail "cannot have empty or nested bold nodes"
+
+bold :: Parser Inline
+bold = do
+    state <- getState
+    let currentParserStack = inlineParserStack state
+    lookAhead (try (string "**") <?>
+        if elem "bold" currentParserStack
+            then "" -- If we're already in a bold block, suppress the error message.
+            else "\"**\" (bold)")
+    if elem "bold" currentParserStack
+        then fail "bold nodes cannot be nested"
+        else return ()
+    s <- betweenWithErrors "**" "**" "bold"
+        $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("bold" : currentParserStack)}
+    return $ Bold s
 
 -- The bold and italics parsers are tricky because they both use the same special character.
-italics :: [String] -> Parser Inline
-italics parserNames = fmap Italics $ between
-    ((try (char' '*' >> lookAhead (noneOf "*"))) <?> "\"*\" (italics)")
-    (char' '*' <?> "closing \"*\" (italics)")
-    $ internalParser "italics" parserNames
+italics :: Parser Inline
+italics = do
+    state <- getState
+    let currentParserStack = inlineParserStack state
+    lookAhead $ (char '*' <?>   -- This would catch both italics and bold, but bold has higher precedence so it's ok.
+        if elem "italics" currentParserStack
+            then ""
+            else "\"*\" (italics)")
+    if elem "italics" currentParserStack
+        then fail "italic nodes cannot be nested"
+        else return ()
+    s <- between
+        (try $ do
+            char' '*' <?> "\"*\" (italics)"
+            notFollowedBy (char '*') <?> "single \"*\" (italics) instead of \"**\" (bold)")
+        (char' '*' <?> "closing \"*\" (italics)")
+        $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("italics" : currentParserStack)}
+    return $ Italics s
 
 code :: Parser Inline
 code = fmap Code $ betweenWithErrors "`" "`" "code" $ many1 $ escapableNoneOf "`"
@@ -187,14 +201,20 @@ footnoteRef = do
     putState $ state {footnoteIndices=f'}
     return $ FootnoteRef index
 
-link :: [String] -> Parser Inline
-link parserNames = do
-    text <- betweenWithErrors "[" "]" "link text" $ internalParser "link" parserNames
+link :: Parser Inline
+link = do
+    state <- getState
+    let currentParserStack = inlineParserStack state
+    lookAhead $ char '['
+    if elem "link" currentParserStack
+        then fail "links cannot be nested"
+        else return ()
+    text <- betweenWithErrors "[" "]" "link text" $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("link" : currentParserStack)}
     href <- betweenWithErrors "(" ")" "link href" $ many $ escapableNoneOf "()"
     return $ Link {text=text, href=href}
 
 inline :: Parser Inline
-inline = choice $ inlineParsers ["bold", "italics", "code", "footnoteRef", "link", "inlineHtml", "plaintext"]
+inline = choice [nestedBold, bold, italics, code, footnoteRef, link, fmap InlineHtml html, fmap Plaintext plaintext]
 
 hardRule :: Parser Block
 hardRule = do
