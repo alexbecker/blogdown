@@ -1,4 +1,4 @@
-module Parsing.ParseHtml where
+module Parsing.ParseHtml (html) where
 
 import Text.Parsec
 

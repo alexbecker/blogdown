@@ -1,4 +1,4 @@
-module Rendering.Render where
+module Rendering.Render (ToHtml, toHtml) where
 
 import Data.List
 import Data.List.Utils

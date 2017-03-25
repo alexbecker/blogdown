@@ -1,4 +1,4 @@
-module Parsing.Text where
+module Parsing.Text (plaintext) where
 
 import Data.Maybe
 import Text.Parsec
