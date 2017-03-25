@@ -1,7 +1,5 @@
 module AST where
 
-import Text.Parsec hiding (Line)
-
 data AST = AST [Block] (Maybe FootnoteDefs)
     deriving (Show)
 

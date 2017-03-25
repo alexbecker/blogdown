@@ -1,12 +1,8 @@
 module Rendering.Render where
 
-import Control.Monad.State.Lazy
 import Data.List
 import Data.List.Utils
-import Data.Maybe
 import System.IO.Unsafe
-import qualified Data.Map.Strict as M
-import qualified Data.Text as T
 
 import AST
 import Rendering.RenderOptions

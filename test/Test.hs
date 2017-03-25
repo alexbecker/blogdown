@@ -1,11 +1,13 @@
 module Main where
 
-import Data.Either
 import Data.String.Utils
 import Text.Parsec
-import Text.Parsec.Error
 
 import Parsing.Parse
+import Parsing.ParseBlock
+import Parsing.ParseHtml
+import Parsing.ParseInline
+import Parsing.State
 import Rendering.Render
 import Rendering.RenderOptions
 

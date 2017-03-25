@@ -1,9 +1,9 @@
 module Main where
 
-import Data.Either
 import Text.Parsec
 
 import Parsing.Parse
+import Parsing.State
 import Rendering.Render
 import Rendering.RenderOptions
 
