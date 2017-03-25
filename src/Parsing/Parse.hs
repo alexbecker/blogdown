@@ -1,6 +1,6 @@
 module Parsing.Parse where
 
-import Text.Parsec
+import Text.Parsec hiding (parse)
 
 import AST
 import Parsing.State
@@ -13,3 +13,6 @@ ast = do
     footnotes <- optionMaybe footnoteDefs
     eof
     return $ AST blocks footnotes
+
+parse :: String -> Either ParseError AST
+parse = runParser ast initialState ""
