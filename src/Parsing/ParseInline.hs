@@ -1,4 +1,4 @@
-module Parsing.ParseInline where
+module Parsing.ParseInline (inline) where
 
 import Data.Maybe
 import Text.Parsec

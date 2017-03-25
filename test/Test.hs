@@ -40,7 +40,7 @@ testCode = expectSuccess "code" inline "`abc`" "<code>abc</code>"
 testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
     "<abbr title=\"\">SQL</abbr>"
-testFootnoteRef = expectSuccess "footnote reference" footnoteRef
+testFootnoteRef = expectSuccess "footnote reference" inline
     "^[x]"
     "<sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup>"
 testLink = expectSuccess "link" inline
