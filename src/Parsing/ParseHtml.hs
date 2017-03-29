@@ -12,9 +12,8 @@ htmlTag tagType = do
         then try (string "</") <?> "\"</\" (closing html tag)"
         else string "<" <?> "\"<\" (html tag)"
     spaces
-    tagname <- many1 letter <?> "html tag name"
-    spaces
-    attrs <- sepEndBy attr spaces
+    tagname <- many1 (letter <?> "rest of tag name") <?> "html tag name"
+    attrs <- many attr
     if tagType == SelfClosing
         then try (string "/>") <?> "closing \"/>\" (self-closing html tag)"
         else string ">" <?> "closing \">\" (html tag)"
@@ -42,6 +41,7 @@ html = try singleTag <|> pairTag
 
 attr :: Parser Attr
 attr = do
+    space >> spaces
     name <- many1 letter <?> "html attribute name"
     char '='
     val <- attrVal

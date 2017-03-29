@@ -40,6 +40,9 @@ testCode = expectSuccess "code" inline "`abc`" "<code>abc</code>"
 testInlineHtml = expectSuccess "inline html" html
     "<abbr title=\"\">SQL</abbr>"
     "<abbr title=\"\">SQL</abbr>"
+testMultipleAttrs = expectSuccess "html with multiple attrs" html
+    "<abbr title=\"a\" id=\"x\">SQL</abbr>"
+    "<abbr title=\"a\" id=\"x\">SQL</abbr>"
 testFootnoteRef = expectSuccess "footnote reference" inline
     "^[x]"
     "<sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup>"
@@ -228,6 +231,10 @@ testNestedLink = expectFailure "links cannot be nested" inline
     "unexpected \"[\"\n\
     \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference) or \"<\" (html tag)\n\
     \links cannot be nested"
+testUnclosedOpeningTag = expectFailure "unclosed opening tag should fail to parse" html
+    "<div"
+    "unexpected end of input\n\
+    \expecting rest of tag name, space or closing \">\" (html tag)"
 testUnclosedTag = expectFailure "unclosed tag should fail to parse" html
     "<p>hello"
     "unexpected end of input\n\
@@ -260,6 +267,7 @@ main = do
     testBoldItalics
     testCode
     testInlineHtml
+    testMultipleAttrs
     testFootnoteRef
     testLink
     testLinkWithContents
@@ -290,6 +298,7 @@ main = do
     testMismatchedBoldItalics
     testSwappedItalicsBold
     testNestedLink
+    testUnclosedOpeningTag
     testUnclosedTag
     testMismatchedTags
     goldenTest "Readme.md" "Readme.html" "--em-dashes --inline-css --inline-js"

@@ -59,7 +59,7 @@ link :: Parser Inline
 link = do
     state <- getState
     let currentParserStack = inlineParserStack state
-    lookAhead $ char '['
+    lookAhead (char '[' <?> "\"[\" (link text)")
     if elem "link" currentParserStack
         then fail "links cannot be nested"
         else return ()
