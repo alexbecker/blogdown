@@ -93,7 +93,7 @@ instance ToHtml Inline where
     toHtml r (FootnoteRef index) = withTag "sup" $ withTagAttrs "a"
         [("href", "#" ++ (footnotePrefix r) ++ "-footnote-" ++ show index),
          ("id", "a-" ++ (footnotePrefix r) ++ "-footnote-" ++ show index)]
-        ("[" ++ show index ++ "]")
+        ("[" ++ show (index + footnoteIndexFrom r) ++ "]")
     toHtml r (Plaintext s) = escapeHtml $ if emDashes r
         then replace "--" "&mdash;" s
         else s
