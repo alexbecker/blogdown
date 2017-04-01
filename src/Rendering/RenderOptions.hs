@@ -1,5 +1,8 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Rendering.RenderOptions where
 
+import GHC.Generics (Generic)
 import System.Environment
 
 data RenderOptions = RenderOptions {
@@ -9,7 +12,7 @@ data RenderOptions = RenderOptions {
     emDashes :: Bool,
     inlineCSS :: Bool,
     inlineJS :: Bool
-}
+} deriving (Generic)
 
 defaultRenderOptions = RenderOptions {
     footnotePrefix = "",
