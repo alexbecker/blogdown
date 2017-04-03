@@ -2,6 +2,7 @@ module Main where
 
 import Data.String.Utils
 import Text.Parsec
+import System.Exit
 
 import Parsing.Parse
 import Parsing.ParseBlock
@@ -11,9 +12,11 @@ import Parsing.State
 import Rendering.Render
 import Rendering.RenderOptions
 
-printExpectedSuccess :: (ToHtml a) => String -> String -> String -> a -> IO ()
+printExpectedSuccess :: (ToHtml a) => String -> String -> String -> a -> IO Bool
 printExpectedSuccess name input expected parsed = if output == expected
-    then putStrLn $ "PASS: " ++ name
+    then do
+        putStrLn $ "PASS: " ++ name
+        return True
     else do
         putStrLn $ "FAIL: " ++ name
         putStrLn "in:"
@@ -22,14 +25,16 @@ printExpectedSuccess name input expected parsed = if output == expected
         putStrLn output
         putStrLn "expect:"
         putStrLn expected
+        return False
     where
         output = toHtml defaultRenderOptions parsed
 
-expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO ()
+expectSuccess :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO Bool
 expectSuccess name p input expected = either
     (\err -> do
         putStrLn $ "FAIL: " ++ name
-        putStrLn $ show err)
+        putStrLn $ show err
+        return False)
     (printExpectedSuccess name input expected)
     $ runParser p initialState name input
 
@@ -201,10 +206,12 @@ testContinuation = expectSuccess "continuation character" paragraph
     "a\\\nb"
     "<p>ab</p>"
 
-expectFailure :: String -> (Parser a) -> String -> String -> IO ()
+expectFailure :: String -> (Parser a) -> String -> String -> IO Bool
 expectFailure name p input expectedErr = either
     (\err -> if endswith expectedErr $ show err
-        then putStrLn $ "PASS: " ++ name
+        then do
+            putStrLn $ "PASS: " ++ name
+            return True
         else do
             putStrLn $ "FAIL: " ++ name
             putStrLn "in:"
@@ -212,8 +219,11 @@ expectFailure name p input expectedErr = either
             putStrLn "out:"
             putStrLn $ show err
             putStrLn "expect:"
-            putStrLn expectedErr)
-    (const $ putStrLn $ "FAIL: " ++ name)
+            putStrLn expectedErr
+            return False)
+    (\_ -> do
+        putStrLn $ "FAIL: " ++ name
+        return False)
     $ runParser p initialState name input
 
 testNestedBold = expectFailure "bold tags cannot be nested" inline
@@ -243,66 +253,75 @@ testMismatchedTags = expectFailure "mismatched tags should fail to parse" html
     "<a>hello</b>"
     "mismatched tags: 'a' and 'b'"
 
-goldenTest :: FilePath -> FilePath -> String -> IO ()
+goldenTest :: FilePath -> FilePath -> String -> IO Bool
 goldenTest inFilePath goldenFilePath renderArgs = do
     let r = renderOptions $ words renderArgs
     input <- readFile inFilePath
     golden <- readFile goldenFilePath
     either
-        (const $ putStrLn $ "FAIL: " ++ goldenFilePath)
+        (\_ -> do
+            putStrLn $ "FAIL: " ++ goldenFilePath
+            return False)
         (\parsed -> do
             let rendered = toHtml r parsed
             if rendered == golden
-                then putStrLn $ "PASS: " ++ goldenFilePath
+                then do
+                    putStrLn $ "PASS: " ++ goldenFilePath
+                    return True
                 else do
                     let failPath = goldenFilePath ++ ".fail"
                     writeFile failPath rendered
-                    putStrLn $ "FAIL: " ++ goldenFilePath)
+                    putStrLn $ "FAIL: " ++ goldenFilePath
+                    return False)
         $ runParser ast initialState inFilePath input
 
 main :: IO ()
 main = do
-    testItalics
-    testBold
-    testBoldItalics
-    testCode
-    testInlineHtml
-    testMultipleAttrs
-    testFootnoteRef
-    testLink
-    testLinkWithContents
-    testH1
-    testH6
-    testHardRule
-    testHardRuleLong
-    testParagraph
-    testEscapeCharacters
-    testHashInParagraph
-    testOrderedList
-    testUnorderedList
-    testBlockQuote
-    testBlockQuotePreFormatted
-    testBlockCode
-    testBlockCodeWhitespace
-    testBlockCodeSpecialChars
-    testBlockHtml
-    testTable
-    testTableHeader
-    testTableMinimal
-    testTableHeaderMinimal
-    testFootnoteDef
-    testFootnoteDefs
-    testFootnoteOrdering
-    testContinuation
-    testNestedBold
-    testMismatchedBoldItalics
-    testSwappedItalicsBold
-    testNestedLink
-    testUnclosedOpeningTag
-    testUnclosedTag
-    testMismatchedTags
-    goldenTest "Readme.md" "Readme.html" "--em-dashes --inline-css --inline-js"
-    goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes"
-    goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks"
-    goldenTest "test/goldens/golden2.md" "test/goldens/golden2.html" "--em-dashes"
-    goldenTest "test/goldens/golden2.md" "test/goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks"
+    results <- sequence [
+        testItalics,
+        testBold,
+        testBoldItalics,
+        testCode,
+        testInlineHtml,
+        testMultipleAttrs,
+        testFootnoteRef,
+        testLink,
+        testLinkWithContents,
+        testH1,
+        testH6,
+        testHardRule,
+        testHardRuleLong,
+        testParagraph,
+        testEscapeCharacters,
+        testHashInParagraph,
+        testOrderedList,
+        testUnorderedList,
+        testBlockQuote,
+        testBlockQuotePreFormatted,
+        testBlockCode,
+        testBlockCodeWhitespace,
+        testBlockCodeSpecialChars,
+        testBlockHtml,
+        testTable,
+        testTableHeader,
+        testTableMinimal,
+        testTableHeaderMinimal,
+        testFootnoteDef,
+        testFootnoteDefs,
+        testFootnoteOrdering,
+        testContinuation,
+        testNestedBold,
+        testMismatchedBoldItalics,
+        testSwappedItalicsBold,
+        testNestedLink,
+        testUnclosedOpeningTag,
+        testUnclosedTag,
+        testMismatchedTags,
+        goldenTest "Readme.md" "Readme.html" "--em-dashes --inline-css --inline-js",
+        goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes",
+        goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks",
+        goldenTest "test/goldens/golden2.md" "test/goldens/golden2.html" "--em-dashes",
+        goldenTest "test/goldens/golden2.md" "test/goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks"]
+    if and results
+        then exitSuccess
+        else exitFailure
