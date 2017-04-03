@@ -21,9 +21,18 @@ With full compatability out of the window, I have chosen to make some other smal
 
 ## Installation
 
-Blogdown requires [GHC](https://www.haskell.org/ghc/), [Parsec](https://hackage.haskell.org/package/parsec) and [MissingH](https://hackage.haskell.org/package/MissingH) to compile,
+### With Cabal or Stack
+
+The recommended way to install any Haskell project is using [Cabal](https://www.haskell.org/cabal/) or [Stack](https://docs.haskellstack.org/en/stable/README/).
+With these tools, you can simply run `cabal install` or `stack build` respectively.
+
+### Without Haskell Tooling
+
+Because configuring Cabal and Stack can be tricky for Haskell beginners, Blogdown supports installation without any Haskell tooling.
+
+First, install [GHC](https://www.haskell.org/ghc/), [Parsec](https://hackage.haskell.org/package/parsec) and [MissingH](https://hackage.haskell.org/package/MissingH),
 all of which are available through common Linux package managers.
-Once these are installed, run `ghc -isrc -o Blogdown src/Blogdown.hs` in the repository's base directory.
+Then run `ghc -isrc -o Blogdown src/Blogdown.hs` in the repository's base directory.
 
 ## Usage
 

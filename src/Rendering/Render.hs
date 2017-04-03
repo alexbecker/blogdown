@@ -1,3 +1,5 @@
+{-# Language CPP #-}
+
 module Rendering.Render (ToHtml, toHtml) where
 
 import Data.List
@@ -5,19 +7,31 @@ import Data.List.Utils
 import System.IO.Unsafe
 
 import AST
+#ifdef CABAL
+import Paths_Blogdown
+#endif
 import Rendering.RenderOptions
 
 class ToHtml a where
     toHtml :: RenderOptions -> a -> String
 
+dataFileContents :: FilePath -> String
+dataFileContents relPath = unsafePerformIO $ do
+#ifdef CABAL
+    newPath <- getDataFileName relPath
+    readFile newPath
+#else
+    readFile relPath
+#endif
+
 optionalJS :: RenderOptions -> String
 optionalJS r = if (inlineJS r)
-    then "<script>" ++ (unsafePerformIO $ readFile "assets/footnotes.js") ++ "</script>\n"
+    then "<script>" ++ dataFileContents "assets/footnotes.js" ++ "</script>\n"
     else ""
 
 optionalCSS :: RenderOptions -> String
 optionalCSS r = if (inlineCSS r)
-    then "<style>" ++ (unsafePerformIO $ readFile "assets/footnotes.css") ++ "</style>\n"
+    then "<style>" ++ dataFileContents "assets/footnotes.css" ++ "</style>\n"
     else ""
 
 instance ToHtml AST where

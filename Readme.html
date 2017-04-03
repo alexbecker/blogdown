@@ -17,9 +17,14 @@ are necessarily quite complex. The primary cause of this complexity is that Mark
 no matter how malformed. Blogdown is considerably simpler, and hopefully easier for authors to debug, because it fails on malformed inputs.
 With full compatability out of the window, I have chosen to make some other small improvements on Markdown syntax.</p>
 <h2>Installation</h2>
-<p>Blogdown requires <a href="https://www.haskell.org/ghc/">GHC</a>, <a href="https://hackage.haskell.org/package/parsec">Parsec</a> and <a href="https://hackage.haskell.org/package/MissingH">MissingH</a> to compile,
+<h3>With Cabal or Stack</h3>
+<p>The recommended way to install any Haskell project is using <a href="https://www.haskell.org/cabal/">Cabal</a> or <a href="https://docs.haskellstack.org/en/stable/README/">Stack</a>.
+With these tools, you can simply run <code>cabal install</code> or <code>stack build</code> respectively.</p>
+<h3>Without Haskell Tooling</h3>
+<p>Because configuring Cabal and Stack can be tricky for Haskell beginners, Blogdown supports installation without any Haskell tooling.</p>
+<p>First, install <a href="https://www.haskell.org/ghc/">GHC</a>, <a href="https://hackage.haskell.org/package/parsec">Parsec</a> and <a href="https://hackage.haskell.org/package/MissingH">MissingH</a>,
 all of which are available through common Linux package managers.
-Once these are installed, run <code>ghc -isrc -o Blogdown src/Blogdown.hs</code> in the repository's base directory.</p>
+Then run <code>ghc -isrc -o Blogdown src/Blogdown.hs</code> in the repository's base directory.</p>
 <h2>Usage</h2>
 <p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
 <pre><code>cat blogpost.md | ./Blogdown &gt; blogpost.html
