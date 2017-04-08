@@ -56,6 +56,11 @@ These can be inlined using the `--inline-css` and `--inline-js` flags respective
  * `--inline-css`: If this flag is passed, the recommended CSS will be inlined at the end of the output document.
  * `--inline-js`: If this flag is passed, the recommended JS will be inlined at the end of the output document.
 
+**Note:** The `inline-*` options require additional files (located in `assets`) to function.
+These will be installed at a known location if built with Cabal or Stack,
+but if the binary is run on a different machine (e.g. a webserver) then the binary is built on,
+the machine must also have the `assets` directory, and the directory containing `assets` should be supplied via the environment variable `blogdown_datadir_override`.
+
 ## Syntax
 
 ### Differences from Markdown

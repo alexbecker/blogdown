@@ -4,7 +4,9 @@ module Rendering.Render (ToHtml, toHtml) where
 
 import Data.List
 import Data.List.Utils
-import System.IO.Unsafe
+import Data.Maybe (isJust, fromJust)
+import System.Environment (lookupEnv)
+import System.IO.Unsafe (unsafePerformIO)
 
 import AST
 #ifdef CABAL
@@ -17,11 +19,14 @@ class ToHtml a where
 
 dataFileContents :: FilePath -> String
 dataFileContents relPath = unsafePerformIO $ do
+    dataDirOverride <- lookupEnv "blogdown_datadir_override"
+    if isJust dataDirOverride
+        then readFile $ fromJust dataDirOverride ++ "/" ++ relPath
+        else
 #ifdef CABAL
-    newPath <- getDataFileName relPath
-    readFile newPath
+            getDataFileName relPath >>= readFile
 #else
-    readFile relPath
+            readFile relPath
 #endif
 
 optionalJS :: RenderOptions -> String
