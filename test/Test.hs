@@ -317,7 +317,7 @@ main = do
         testUnclosedOpeningTag,
         testUnclosedTag,
         testMismatchedTags,
-        goldenTest "Readme.md" "Readme.html" "--em-dashes --inline-css --inline-js",
+        goldenTest "Readme.md" "test/goldens/Readme.html" "--em-dashes --inline-css --inline-js",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks",
         goldenTest "test/goldens/golden2.md" "test/goldens/golden2.html" "--em-dashes",

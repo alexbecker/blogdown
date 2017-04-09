@@ -9,10 +9,7 @@ maintainer:          acbecker@uchicago.edu
 copyright:           (c) 2017 Alex Becker
 category:            Web
 build-type:          Simple
-extra-source-files:
-    Readme.html
-    ChangeLog.md
-    Readme.md
+extra-source-files:  ChangeLog.md, Readme.md
 data-files:          assets/footnotes.css, assets/footnotes.js
 cabal-version:       >=1.10
 
