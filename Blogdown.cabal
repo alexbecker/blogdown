@@ -1,5 +1,5 @@
 name:                Blogdown
-version:             0.1.0
+version:             0.1.1
 synopsis:            A markdown-like markup language designed for blog posts
 description:         A library and executable that implement a modified, extended version of Markdown designed for writing blog posts.
 license:             AGPL-3
