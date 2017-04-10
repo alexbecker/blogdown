@@ -183,6 +183,15 @@ testFootnoteDef = expectSuccess "footnote definition" ast
     \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>This is a single list item\n\
     \of footnote.</p></li>\n\
     \</ol>\n"
+testFootnoteDefTwoLines = expectSuccess "footnote definition, separated by 2 lines" ast
+    "^[x]\n\
+    \\n\
+    \~[x] This is a single list item\n\
+    \of footnote.\n"
+    "<p><sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup></p>\n\
+    \<ol start=\"0\" class=\"footnotes\"><li id=\"-footnote-0\"><p>This is a single list item\n\
+    \of footnote.</p></li>\n\
+    \</ol>\n"
 testFootnoteDefs = expectSuccess "multiple footnote definitions" ast
     "^[0]^[1]^[2]\n\
     \~[0] a\n\
@@ -307,6 +316,7 @@ main = do
         testTableMinimal,
         testTableHeaderMinimal,
         testFootnoteDef,
+        testFootnoteDefTwoLines,
         testFootnoteDefs,
         testFootnoteOrdering,
         testContinuation,

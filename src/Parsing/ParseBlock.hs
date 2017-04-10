@@ -80,4 +80,7 @@ table = do
     return $ Table headerRows bodyRows
 
 block :: Parser Block
-block = (many $ char '\n') >> choice [blockHtml, hardRule, header, orderedList, unorderedList, blockQuote, table, blockCode, paragraph]
+block = between
+    (many $ char '\n')
+    (many $ char '\n')
+    (choice [blockHtml, hardRule, header, orderedList, unorderedList, blockQuote, table, blockCode, paragraph])
