@@ -6,6 +6,7 @@ license:             AGPL-3
 license-file:        LICENSE
 author:              Alex Becker
 maintainer:          acbecker@uchicago.edu
+homepage:            https://blogdown.io
 copyright:           (c) 2017 Alex Becker
 category:            Web
 build-type:          Simple

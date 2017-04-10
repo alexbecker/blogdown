@@ -1,7 +1,7 @@
 *Note: If you are viewing this Readme on GitHub, its Blogdown-specific features will not render correctly.
 The Blogdown-formatted output is in `test/goldens/Readme.html`.*
 
-# Blogdown
+# [Blogdown](https://blogdown.io)
 
 Blogdown is a markup language based on Markdown, designed for writing blog posts.
 Blogdown's goals are:
