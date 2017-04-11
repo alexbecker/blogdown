@@ -74,11 +74,17 @@ Can contain arbitrary inline nodes.</li>
 <li><b>Header</b>: 1-6 <code>#</code> characters at the beginning of a line begins a header, with the number of <code>#</code> characters determining the header level.
 Can contain arbitrary inline nodes.</li>
 <li><b>Ordered Lists</b>: A <code> - </code> begins an ordered list item, which itself is a block.
-Sequential ordered list items form an ordered list.
-Can contain arbitrary inline nodes.</li>
+Sequential ordered list items or sublists form an ordered list.
+List items can contain arbitrary inline nodes.</li>
+<ul><li>Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with <code>  * </code>.</li>
+</ul>
 <li><b>Unordered Lists</b>: A <code> * </code> begins an unordered list item, which itself is a block.
-Sequential unordered list items form an unordered list.
-Can contain arbitrary inline nodes.</li>
+Sequential unordered list items or sublists form an unordered list.
+List items can contain arbitrary inline nodes.</li>
+<ul><li>Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with <code>  * </code>.</li>
+</ul>
 <li><b>Blockquote</b>: Lines beginning with <code>&gt; </code> define a blockquote.
 Can contain arbitrary inline nodes.
 Note that the first line not beginning with <code>&gt; </code> will start a new block.</li>
@@ -117,14 +123,11 @@ A footnote definition is only terminated by another footnote definition or the e
 <p>Any character (special or not) can be escaped with <code>\</code>. For a literal backslash, use <code>\\</code>.
 A backslash before a newline acts as a continuation character.</p>
 <h2>Planned improvements</h2>
-<ul><li>Nested lists</li>
-<li>Better error messages on parse failures</li>
+<ul><li>Better error messages on parse failures</li>
 <li>Windows support</li>
-<li>Better tests</li>
 <li>Document building & running tests</li>
 <li>Comments</li>
 </ul>
-<hr/>
 <ol start="0" class="footnotes"><li id="-footnote-0"><p>Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.
 Doing so will degrade network and browser performance slightly.</p></li>
 <li id="-footnote-1"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>

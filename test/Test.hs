@@ -74,16 +74,36 @@ testHashInParagraph = expectSuccess "paragraph containing literal '#'" paragraph
     \containing '#'\n"
     "<p>This is a paragraph\n\
     \containing '#'</p>"
-testOrderedList = expectSuccess "ol" orderedList
+testOrderedList = expectSuccess "ol" listBlock
     " - point 1\n\
     \ - point 2\n"
     "<ol><li>point 1</li>\n\
-    \<li>point 2</li>\n</ol>"
-testUnorderedList = expectSuccess "ul" unorderedList
+    \<li>point 2</li>\n\
+    \</ol>"
+testUnorderedList = expectSuccess "ul" listBlock
     " * point 1\n\
     \ * point 2\n"
     "<ul><li>point 1</li>\n\
-    \<li>point 2</li>\n</ul>"
+    \<li>point 2</li>\n\
+    \</ul>"
+testNestedList = expectSuccess "nested list" listBlock
+    " - point 1\n\
+    \ - point 2\n\
+    \  * point 3\n\
+    \  * point 4\n\
+    \   - point 5\n\
+    \  * point 6\n\
+    \ - point 7\n"
+    "<ol><li>point 1</li>\n\
+    \<li>point 2</li>\n\
+    \<ul><li>point 3</li>\n\
+    \<li>point 4</li>\n\
+    \<ol><li>point 5</li>\n\
+    \</ol>\n\
+    \<li>point 6</li>\n\
+    \</ul>\n\
+    \<li>point 7</li>\n\
+    \</ol>"
 testBlockQuote = expectSuccess "blockquote" blockQuote
     "> The politician said that\n\
     \> he would fix the economy.\n"
@@ -305,6 +325,7 @@ main = do
         testHashInParagraph,
         testOrderedList,
         testUnorderedList,
+        testNestedList,
         testBlockQuote,
         testBlockQuotePreFormatted,
         testBlockCode,

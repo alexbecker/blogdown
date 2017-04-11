@@ -84,8 +84,7 @@ instance ToHtml Block where
     toHtml _ HardRule = "<hr/>"
     toHtml r (Paragraph ls) = withTag "p" $ stripEndingNewline $ concatMap (toHtml r) ls
     toHtml r (Header level text) = withTag ("h" ++ show level) $ stripEndingNewline $ concatMap (toHtml r) text
-    toHtml r (OrderedList ls) = withTag "ol" $ unlines $ map (toHtml r) ls
-    toHtml r (UnorderedList ls) = withTag "ul" $ unlines $ map (toHtml r) ls
+    toHtml r (ListBlock l) = toHtml r l
     toHtml r (BlockQuote ls) = withTag "blockquote" $ stripEndingNewline $ concatMap (toHtml r) ls
     toHtml _ (BlockCode s) = withTag "pre" $ withTag "code" $ escapeHtml s
     toHtml r (BlockHtml h) = toHtml r h
@@ -95,8 +94,13 @@ instance ToHtml Block where
         header = unlines $ map (toHtml r) ths
         body = unlines $ map (toHtml r) trs
 
+instance ToHtml List where
+    toHtml r (List True ls) = withTag "ol" $ unlines $ map (toHtml r) ls
+    toHtml r (List False ls) = withTag "ul" $ unlines $ map (toHtml r) ls
+
 instance ToHtml ListItem where
-    toHtml r (ListItem _ ls) = withTag "li" $ stripEndingNewline $ concatMap (toHtml r) ls
+    toHtml r (ListItem ls) = withTag "li" $ stripEndingNewline $ concatMap (toHtml r) ls
+    toHtml r (SubList l) = toHtml r l
 
 instance ToHtml TableCell where
     toHtml r (TableHeaderCell tds) = withTag "th" $ concatMap (toHtml r) tds

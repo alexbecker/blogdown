@@ -26,17 +26,27 @@ header = do
     text <- many1 inline
     return $ Header (length hashes) text
 
-listItem :: Bool -> Parser ListItem
-listItem ordered = fmap (ListItem ordered) $ do
-    let identifier = if ordered then " - " else " * "
-    (try $ string' identifier) <?> ("\"" ++ identifier ++ "\" (list item)")
-    many1 $ inline
+listItem :: Bool -> Int -> Parser ListItem
+listItem ordered depth = fmap ListItem $ do
+    let identifier = replicate depth ' ' ++ if ordered
+        then "- "
+        else "* "
+    let errMsg = "\"" ++ identifier ++ "\" " ++ if ordered
+        then "(ordered list item)"
+        else "(unordered list item)"
+    try (string' identifier) <?> errMsg
+    many1 inline
 
-orderedList :: Parser Block
-orderedList = fmap OrderedList $ many1 $ listItem True
+list :: Bool -> Int -> Parser List
+list ordered depth = do
+    first <- listItem ordered depth
+    remainder <- many (listItem ordered depth
+                   <|> fmap SubList (list True (depth + 1))
+                   <|> fmap SubList (list False (depth + 1)))
+    return $ List ordered $ first : remainder
 
-unorderedList :: Parser Block
-unorderedList = fmap UnorderedList $ many1 $ listItem False
+listBlock :: Parser Block
+listBlock = fmap ListBlock (list True 1 <|> list False 1)
 
 blockQuoteLineStart :: Parser String
 blockQuoteLineStart = try (string "> ") <?> "\"> \" (blockquote)"
@@ -83,4 +93,4 @@ block :: Parser Block
 block = between
     (many $ char '\n')
     (many $ char '\n')
-    (choice [blockHtml, hardRule, header, orderedList, unorderedList, blockQuote, table, blockCode, paragraph])
+    (choice [blockHtml, hardRule, header, listBlock, blockQuote, table, blockCode, paragraph])

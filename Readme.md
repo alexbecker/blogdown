@@ -102,11 +102,15 @@ Can contain arbitrary inline nodes.
  * **Header**: 1-6 `#` characters at the beginning of a line begins a header, with the number of `#` characters determining the header level.
 Can contain arbitrary inline nodes.
  * **Ordered Lists**: A ` - ` begins an ordered list item, which itself is a block.
-Sequential ordered list items form an ordered list.
-Can contain arbitrary inline nodes.
+Sequential ordered list items or sublists form an ordered list.
+List items can contain arbitrary inline nodes.
+  * Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with `  * `.
  * **Unordered Lists**: A ` * ` begins an unordered list item, which itself is a block.
-Sequential unordered list items form an unordered list.
-Can contain arbitrary inline nodes.
+Sequential unordered list items or sublists form an unordered list.
+List items can contain arbitrary inline nodes.
+  * Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with `  * `.
  * **Blockquote**: Lines beginning with `> ` define a blockquote.
 Can contain arbitrary inline nodes.
 Note that the first line not beginning with `> ` will start a new block.
@@ -151,14 +155,10 @@ Any character (special or not) can be escaped with `\\`. For a literal backslash
 A backslash before a newline acts as a continuation character.
 
 ## Planned improvements
- * Nested lists
  * Better error messages on parse failures
  * Windows support
- * Better tests
  * Document building & running tests
  * Comments
-
----
 
 ~[inline] Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.
 Doing so will degrade network and browser performance slightly.

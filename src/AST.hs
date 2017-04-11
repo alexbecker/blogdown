@@ -12,7 +12,11 @@ data FootnoteDef = FootnoteDef {
 }
     deriving (Show)
 
-data ListItem = ListItem Bool [Inline]
+data ListItem = ListItem [Inline]
+              | SubList List
+    deriving (Show)
+
+data List = List Bool [ListItem]
     deriving (Show)
 
 data TableCell = TableHeaderCell [Inline]
@@ -25,8 +29,7 @@ data TableRow = TableRow [TableCell]
 data Block = HardRule
            | Paragraph [Inline]
            | Header Int [Inline]
-           | OrderedList [ListItem]
-           | UnorderedList [ListItem]
+           | ListBlock List
            | BlockQuote [Inline]
            | BlockCode String
            | BlockHtml Html
