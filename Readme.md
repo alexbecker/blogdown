@@ -82,7 +82,7 @@ The `#` syntax for headers is supported instead.
 It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
 The `<br/>` tag is supported instead.
 
-The `\~` and `\^` characters are now special, and must be escaped to be used in text.
+Since Blogdown introduces new syntax, some valid Markdown will require escaping to render as expected in Blogdown.
 Additionally, while most Markdown implementations do not require escaping many special characters when their special meaning would
 not be valid, Blogdown always requires they be escaped.
 

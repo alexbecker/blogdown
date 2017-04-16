@@ -6,7 +6,8 @@ import Text.Parsec
 import Parsing.State
 import Parsing.Utils
 
-specials = "*`^<>[]|\\"
+specials = "*`<>[]|\\"
+specialStrings = ["^["]
 firstCharSpecials = " \t#~+\n" ++ specials
 
 -- Parse a single non-special character, allowing for escaping and continuation.
@@ -17,7 +18,12 @@ nonSpecial blacklist = do
         then do
             optional $ char '\n'    -- continuation
             anyChar
-        else noneOf blacklist
+        else do
+            maybeSpecialStrings <- mapM (\s -> suppressErr $ optionMaybe $ lookAhead $ try $ string s) specialStrings
+            let specialStringsFound = catMaybes maybeSpecialStrings
+            if length specialStringsFound > 0
+                then fail $ "special string sequence \"" ++ head specialStringsFound ++ "\""
+                else noneOf blacklist
 
 -- Parse one or more non-special characters, allowing for escaping and incorporating the
 -- rules for special characters at the start of a line. Note that this does not consume

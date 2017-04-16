@@ -57,6 +57,7 @@ testLink = expectSuccess "link" inline
 testLinkWithContents = expectSuccess "link with styling inside" inline
     "[*Whence* `he` **came**](https://google.com)"
     "<a href=\"https://google.com\"><i>Whence</i> <code>he</code> <b>came</b></a>"
+testCaret = expectSuccess "literal '^' does not need escaping" inline "^" "^"
 testH1 = expectSuccess "h1" header "# hello" "<h1>hello</h1>"
 testH6 = expectSuccess "h6" header "###### hello" "<h6>hello</h6>"
 testHardRule = expectSuccess "hard rule" hardRule "---\n" "<hr/>"
@@ -288,8 +289,9 @@ goldenTest inFilePath goldenFilePath renderArgs = do
     input <- readFile inFilePath
     golden <- readFile goldenFilePath
     either
-        (\_ -> do
+        (\err -> do
             putStrLn $ "FAIL: " ++ goldenFilePath
+            putStrLn $ show err
             return False)
         (\parsed -> do
             let rendered = toHtml r parsed
@@ -316,6 +318,7 @@ main = do
         testFootnoteRef,
         testLink,
         testLinkWithContents,
+        testCaret,
         testH1,
         testH6,
         testHardRule,
