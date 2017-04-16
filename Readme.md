@@ -137,8 +137,10 @@ The following inline node types are supported:
  * **Italic**: Surrounding text with `*` *italicizes* it. Italic nodes can contain any other type of inline node.
  * **Bold**: Surrounding text with `**` **bolds** it. Bold nodes can contain any other type of inline node.
  * **Code**: Surrounding text with `\`` renders it as `code`. The content is rendered verbatim.
- * **Link**: A [link](#) is written as \[*text*\]\(*href*\). The *text* portion can contain any other type of inline node.
+ * **Link**: A [link](#) is written as \[*text*\](*href*). The *text* portion can contain any other type of inline node.
 The *href* portion is the link destination, and is parsed verbatim except that any literal `(` or `)` must be escaped.
+ * **Image**: A image is written as \!\[*alt*\](*src*). The *alt* and *src* values are parsed verbatim except that any literal
+`[` or `]` in the *alt* value and `(` or `)` in the *src* value must be escaped.
  * **Footnote Reference**: Writing \^\[*footnote-name*\] defines a footnote reference.
 It is rendered as a superscript footnote number^[footnote-numbering], and links to the footnote named *footnote-name*
 if it is present in the footer.

@@ -55,17 +55,23 @@ footnoteRef = do
     putState $ state {footnoteIndices=f'}
     return $ FootnoteRef index
 
+image :: Parser Inline
+image = do
+    alt <- betweenWithErrors' "![" "]" "image" $ many1 $ escapableNoneOf "[]"
+    src <- betweenWithErrors' "(" ")" "image src" $ many $ escapableNoneOf "()"
+    return $ Image {alt=alt, src=src}
+
 link :: Parser Inline
 link = do
     state <- getState
     let currentParserStack = inlineParserStack state
-    lookAhead (char '[' <?> "\"[\" (link text)")
+    lookAhead (char '[' <?> "\"[\" (link)")
     if elem "link" currentParserStack
         then fail "links cannot be nested"
         else return ()
-    text <- betweenWithErrors' "[" "]" "link text" $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("link" : currentParserStack)}
+    text <- betweenWithErrors' "[" "]" "link" $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("link" : currentParserStack)}
     href <- betweenWithErrors' "(" ")" "link href" $ many $ escapableNoneOf "()"
     return $ Link {text=text, href=href}
 
 inline :: Parser Inline
-inline = choice [nestedBold, bold, italics, code, footnoteRef, link, fmap InlineHtml html, fmap Plaintext plaintext]
+inline = choice [nestedBold, bold, italics, code, footnoteRef, link, image, fmap InlineHtml html, fmap Plaintext plaintext]

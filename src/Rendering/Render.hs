@@ -122,6 +122,7 @@ instance ToHtml Inline where
         else s
     toHtml r (InlineHtml h) = toHtml r h
     toHtml r (Link text href) = withTagAttrs "a" [("href", href)] $ concatMap (toHtml r) text
+    toHtml _ (Image alt src) = "<img alt=\"" ++ alt ++ "\" src=\"" ++ src ++ "\"/>"
 
 showAttr :: Attr -> String
 showAttr (Attr s t) = s ++ "=\"" ++ t ++ "\""

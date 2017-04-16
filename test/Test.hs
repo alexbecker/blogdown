@@ -51,13 +51,17 @@ testMultipleAttrs = expectSuccess "html with multiple attrs" html
 testFootnoteRef = expectSuccess "footnote reference" inline
     "^[x]"
     "<sup><a href=\"#-footnote-0\" id=\"a--footnote-0\">[0]</a></sup>"
+testCaret = expectSuccess "literal '^' does not need escaping" inline "^" "^"
+testImage = expectSuccess "inline image" inline
+    "![an image](/img/0)"
+    "<img alt=\"an image\" src=\"/img/0\"/>"
+testExclamationMark = expectSuccess "literal '!' does not need escaping" inline "!" "!"
 testLink = expectSuccess "link" inline
     "[Google](https://google.com)"
     "<a href=\"https://google.com\">Google</a>"
 testLinkWithContents = expectSuccess "link with styling inside" inline
     "[*Whence* `he` **came**](https://google.com)"
     "<a href=\"https://google.com\"><i>Whence</i> <code>he</code> <b>came</b></a>"
-testCaret = expectSuccess "literal '^' does not need escaping" inline "^" "^"
 testH1 = expectSuccess "h1" header "# hello" "<h1>hello</h1>"
 testH6 = expectSuccess "h6" header "###### hello" "<h6>hello</h6>"
 testHardRule = expectSuccess "hard rule" hardRule "---\n" "<hr/>"
@@ -269,7 +273,7 @@ testSwappedItalicsBold = expectFailure "italics and bold closing tags swapped" p
 testNestedLink = expectFailure "links cannot be nested" inline
     "[[a](https://a.com)](https://b.com)"
     "unexpected \"[\"\n\
-    \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference) or \"<\" (html tag)\n\
+    \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference), \"![\" (image) or \"<\" (html tag)\n\
     \links cannot be nested"
 testUnclosedOpeningTag = expectFailure "unclosed opening tag should fail to parse" html
     "<div"
@@ -319,6 +323,8 @@ main = do
         testLink,
         testLinkWithContents,
         testCaret,
+        testImage,
+        testExclamationMark,
         testH1,
         testH6,
         testHardRule,

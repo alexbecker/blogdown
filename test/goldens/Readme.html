@@ -111,6 +111,8 @@ Despite the name, inline nodes can span multiple lines, e.g. to accomodate line 
 <li><b>Code</b>: Surrounding text with <code>`</code> renders it as <code>code</code>. The content is rendered verbatim.</li>
 <li><b>Link</b>: A <a href="#">link</a> is written as [<i>text</i>](<i>href</i>). The <i>text</i> portion can contain any other type of inline node.
 The <i>href</i> portion is the link destination, and is parsed verbatim except that any literal <code>(</code> or <code>)</code> must be escaped.</li>
+<li><b>Image</b>: A image is written as ![<i>alt</i>](<i>src</i>). The <i>alt</i> and <i>src</i> values are parsed verbatim except that any literal
+<code>[</code> or <code>]</code> in the <i>alt</i> value and <code>(</code> or <code>)</code> in the <i>src</i> value must be escaped.</li>
 <li><b>Footnote Reference</b>: Writing ^[<i>footnote-name</i>] defines a footnote reference.
 It is rendered as a superscript footnote number<sup><a href="#-footnote-2" id="a--footnote-2">[2]</a></sup>, and links to the footnote named <i>footnote-name</i>
 if it is present in the footer.</li>

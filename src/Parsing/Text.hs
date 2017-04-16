@@ -7,7 +7,7 @@ import Parsing.State
 import Parsing.Utils
 
 specials = "*`<>[]|\\"
-specialStrings = ["^["]
+specialStrings = ["^[", "!["]
 firstCharSpecials = " \t#~+\n" ++ specials
 
 -- Parse a single non-special character, allowing for escaping and continuation.

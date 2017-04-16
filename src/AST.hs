@@ -49,6 +49,10 @@ data Inline = Italics [Inline]
     text :: [Inline],
     href :: String
 }
+            | Image {
+    alt :: String,
+    src :: String
+}
     deriving (Show)
 
 data HtmlTagType = Open | Close | SelfClosing
