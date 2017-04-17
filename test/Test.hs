@@ -260,7 +260,7 @@ expectFailure name p input expectedErr = either
             return False)
     (\parsed -> do
         putStrLn $ "FAIL: " ++ name
-        putStrLn $ "unexpected success"
+        putStrLn $ "unexpected success:"
         putStrLn $ toHtml defaultRenderOptions parsed
         return False)
     $ runParser p initialState name input
@@ -296,6 +296,11 @@ testUnclosedTag = expectFailure "unclosed tag should fail to parse" html
 testMismatchedTags = expectFailure "mismatched tags should fail to parse" html
     "<a>hello</b>"
     "mismatched tags: 'a' and 'b'"
+testBadTableSeparator = expectFailure "incomplete table separator" block
+    "+---+---\n\
+    \| a | b |"
+    "unexpected \"\\n\"\n\
+    \expecting \"-\" or \"+\" (table)"
 
 goldenTest :: FilePath -> FilePath -> String -> IO Bool
 goldenTest inFilePath goldenFilePath renderArgs = do
@@ -369,6 +374,7 @@ main = do
         testUnclosedOpeningTag,
         testUnclosedTag,
         testMismatchedTags,
+        testBadTableSeparator,
         goldenTest "Readme.md" "test/goldens/Readme.html" "--em-dashes --inline-css --inline-js",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks",

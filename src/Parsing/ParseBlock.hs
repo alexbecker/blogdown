@@ -71,7 +71,7 @@ tableRow = manyTill ((char' '|' <?> "\"|\" (table cell)") >> many1 inline) (try 
 
 tableSeparator :: Parser ()
 tableSeparator = optional $ do
-    sepBy1 (char '+' <?> "\"+\" (table)") (optionMaybe (char ' ') >> many1 (char '-') >> optionMaybe (char ' '))
+    sepBy1 (char '+' <?> "\"+\" (table)") $ many1 (char '-')
     char' '\n'
 
 table :: Parser Block
