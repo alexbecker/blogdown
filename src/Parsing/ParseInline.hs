@@ -1,6 +1,7 @@
 module Parsing.ParseInline (inline) where
 
 import Data.Maybe
+import Network.URI (isURI)
 import Text.Parsec
 import qualified Data.Map.Strict as M
 
@@ -70,8 +71,16 @@ link = do
         then fail "links cannot be nested"
         else return ()
     text <- betweenWithErrors' "[" "]" "link" $ withModifiedState (many1 inline) $ \s -> s {inlineParserStack=("link" : currentParserStack)}
-    href <- betweenWithErrors' "(" ")" "link href" $ many $ escapableNoneOf "()"
-    return $ Link {text=text, href=href}
+    href <- optionMaybe $ betweenWithErrors' "(" ")" "link href" $ many $ escapableNoneOf "()"
+    if isJust href
+        then return $ Link {text=text, href=fromJust href}
+        else do
+            let text' = unboxPlaintext text where
+                unboxPlaintext [Plaintext p] = p
+                unboxPlaintext _ = ""
+            if isURI text'
+                then return $ Link {text=text, href=text'}
+                else fail "link href is required unless link text is a valid absolute URI"
 
 inline :: Parser Inline
 inline = choice [nestedBold, bold, italics, code, footnoteRef, link, image, fmap InlineHtml html, fmap Plaintext plaintext]

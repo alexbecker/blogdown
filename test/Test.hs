@@ -62,6 +62,9 @@ testLink = expectSuccess "link" inline
 testLinkWithContents = expectSuccess "link with styling inside" inline
     "[*Whence* `he` **came**](https://google.com)"
     "<a href=\"https://google.com\"><i>Whence</i> <code>he</code> <b>came</b></a>"
+testLinkImplicit = expectSuccess "link with implicit href" inline
+    "[https://google.com]"
+    "<a href=\"https://google.com\">https://google.com</a>"
 testH1 = expectSuccess "h1" header "# hello" "<h1>hello</h1>"
 testH6 = expectSuccess "h6" header "###### hello" "<h6>hello</h6>"
 testHardRule = expectSuccess "hard rule" hardRule "---\n" "<hr/>"
@@ -240,7 +243,7 @@ testContinuation = expectSuccess "continuation character" paragraph
     "a\\\nb"
     "<p>ab</p>"
 
-expectFailure :: String -> (Parser a) -> String -> String -> IO Bool
+expectFailure :: (ToHtml a) => String -> (Parser a) -> String -> String -> IO Bool
 expectFailure name p input expectedErr = either
     (\err -> if endswith expectedErr $ show err
         then do
@@ -255,8 +258,10 @@ expectFailure name p input expectedErr = either
             putStrLn "expect:"
             putStrLn expectedErr
             return False)
-    (\_ -> do
+    (\parsed -> do
         putStrLn $ "FAIL: " ++ name
+        putStrLn $ "unexpected success"
+        putStrLn $ toHtml defaultRenderOptions parsed
         return False)
     $ runParser p initialState name input
 
@@ -275,6 +280,11 @@ testNestedLink = expectFailure "links cannot be nested" inline
     "unexpected \"[\"\n\
     \expecting \"**\" (bold), \"*\" (italics), \"`\" (code), \"^[\" (footnote reference), \"![\" (image) or \"<\" (html tag)\n\
     \links cannot be nested"
+testBadImplicitLink = expectFailure "link href required unless text is valid URI" inline
+    "[notauri]"
+    "unexpected end of input\n\
+    \expecting \"(\" (link href)\n\
+    \link href is required unless link text is a valid absolute URI"
 testUnclosedOpeningTag = expectFailure "unclosed opening tag should fail to parse" html
     "<div"
     "unexpected end of input\n\
@@ -322,6 +332,7 @@ main = do
         testFootnoteRef,
         testLink,
         testLinkWithContents,
+        testLinkImplicit,
         testCaret,
         testImage,
         testExclamationMark,
@@ -354,6 +365,7 @@ main = do
         testMismatchedBoldItalics,
         testSwappedItalicsBold,
         testNestedLink,
+        testBadImplicitLink,
         testUnclosedOpeningTag,
         testUnclosedTag,
         testMismatchedTags,

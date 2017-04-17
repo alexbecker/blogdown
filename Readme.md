@@ -130,14 +130,15 @@ Optionally the table may start and end with such a separator as well.
 #### Inline Nodes
 
 Inline nodes can generally contain a sequence of other inline nodes, but cannot contain nodes of the same type.
-Despite the name, inline nodes can span multiple lines, e.g. to accomodate line length limits.
+Despite the name, inline nodes can span multiple lines, e.g. to accommodate line length limits.
 
 The following inline node types are supported:
  * **Plaintext**: The default inline type; any text not in another inline node is plaintext. Rendered verbatim.
  * **Italic**: Surrounding text with `*` *italicizes* it. Italic nodes can contain any other type of inline node.
  * **Bold**: Surrounding text with `**` **bolds** it. Bold nodes can contain any other type of inline node.
  * **Code**: Surrounding text with `\`` renders it as `code`. The content is rendered verbatim.
- * **Link**: A [link](#) is written as \[*text*\](*href*). The *text* portion can contain any other type of inline node.
+ * **Link**: A [link](#) is written as \[*text*\](*href*). The *text* can contain any other type of inline node.
+Note that the (*href*) portion can be omitted entirely if *text* is a valid absolute URI (including scheme).
 The *href* portion is the link destination, and is parsed verbatim except that any literal `(` or `)` must be escaped.
  * **Image**: A image is written as \!\[*alt*\](*src*). The *alt* and *src* values are parsed verbatim except that any literal
 `[` or `]` in the *alt* value and `(` or `)` in the *src* value must be escaped.

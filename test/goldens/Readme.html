@@ -103,13 +103,14 @@ Optionally the table may start and end with such a separator as well.</li>
 </ul>
 <h4>Inline Nodes</h4>
 <p>Inline nodes can generally contain a sequence of other inline nodes, but cannot contain nodes of the same type.
-Despite the name, inline nodes can span multiple lines, e.g. to accomodate line length limits.</p>
+Despite the name, inline nodes can span multiple lines, e.g. to accommodate line length limits.</p>
 <p>The following inline node types are supported:</p>
 <ul><li><b>Plaintext</b>: The default inline type; any text not in another inline node is plaintext. Rendered verbatim.</li>
 <li><b>Italic</b>: Surrounding text with <code>*</code> <i>italicizes</i> it. Italic nodes can contain any other type of inline node.</li>
 <li><b>Bold</b>: Surrounding text with <code>**</code> <b>bolds</b> it. Bold nodes can contain any other type of inline node.</li>
 <li><b>Code</b>: Surrounding text with <code>`</code> renders it as <code>code</code>. The content is rendered verbatim.</li>
-<li><b>Link</b>: A <a href="#">link</a> is written as [<i>text</i>](<i>href</i>). The <i>text</i> portion can contain any other type of inline node.
+<li><b>Link</b>: A <a href="#">link</a> is written as [<i>text</i>](<i>href</i>). The <i>text</i> can contain any other type of inline node.
+Note that the (<i>href</i>) portion can be omitted entirely if <i>text</i> is a valid absolute URI (including scheme).
 The <i>href</i> portion is the link destination, and is parsed verbatim except that any literal <code>(</code> or <code>)</code> must be escaped.</li>
 <li><b>Image</b>: A image is written as ![<i>alt</i>](<i>src</i>). The <i>alt</i> and <i>src</i> values are parsed verbatim except that any literal
 <code>[</code> or <code>]</code> in the <i>alt</i> value and <code>(</code> or <code>)</code> in the <i>src</i> value must be escaped.</li>
