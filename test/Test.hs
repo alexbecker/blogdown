@@ -301,6 +301,11 @@ testBadTableSeparator = expectFailure "incomplete table separator" block
     \| a | b |"
     "unexpected \"\\n\"\n\
     \expecting \"-\" or \"+\" (table)"
+testBadListNesting = expectFailure "incorrectly nested lists" ast
+    " * a\n\
+    \   * b\n"
+    "unexpected \" \"\n\
+    \expecting \" - \" (ordered list item) or \" * \" (unordered list item)"
 
 goldenTest :: FilePath -> FilePath -> String -> IO Bool
 goldenTest inFilePath goldenFilePath renderArgs = do
@@ -375,6 +380,7 @@ main = do
         testUnclosedTag,
         testMismatchedTags,
         testBadTableSeparator,
+        testBadListNesting,
         goldenTest "Readme.md" "test/goldens/Readme.html" "--em-dashes --inline-css --inline-js",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks",
