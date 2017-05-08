@@ -124,38 +124,33 @@ instance ToHtml Inline where
     toHtml r (Link text href) = withTagAttrs "a" [("href", href)] $ concatMap (toHtml r) text
     toHtml _ (Image alt src) = "<img alt=\"" ++ alt ++ "\" src=\"" ++ src ++ "\"/>"
 
-showAttr :: Attr -> String
-showAttr (Attr s t) = s ++ "=\"" ++ t ++ "\""
+instance ToHtml HtmlTag where
+    toHtml r (HtmlTag name attrs) = unwords (name : (map showAttr filteredAttrs)) where
+        showAttr (Attr s t) = s ++ "=\"" ++ t ++ "\""
+        filteredAttrs = maybe attrs (\allowed -> filter (\(Attr name val) -> elem name allowed) attrs) $ allowedAttributes r
 
-showInnerTag :: Maybe [String] -> HtmlTag -> String
-showInnerTag attributes t = unwords (tagname t : (map showAttr filteredAttrs)) where
-    filteredAttrs = maybe (attrs t) (\allowedList -> filter (\(Attr name val) -> elem name allowedList) $ attrs t) attributes
-
-showHtmlContent :: Maybe [String] -> Maybe [String] -> Either String Html -> String
-showHtmlContent _ _ (Left s) = s
-showHtmlContent tags attributes (Right h) = showHtml tags attributes  h
-
-showHtml :: Maybe [String] -> Maybe [String] -> Html -> String
-showHtml tags attributes (PairTag open content) = concat [
-    leftBracket,
-    showInnerTag attributes open,
-    rightBracket,
-    concatMap (showHtmlContent tags attributes) content,
-    leftBracket ++ "/",
-    tagname open,
-    rightBracket]
-    where
-        allowTag = maybe True (\attrs -> elem (tagname open) attrs) tags
-        leftBracket = if allowTag then "<" else "&lt;"
-        rightBracket = if allowTag then ">" else "&gt;"
-showHtml tags attributes (SingleTag tag) = concat [
-    leftBracket,
-    showInnerTag attributes tag,
-    "/" ++ rightBracket]
-    where
-        allowTag = maybe True (\attrs -> elem (tagname tag) attrs) tags
-        leftBracket = if allowTag then "<" else "&lt;"
-        rightBracket = if allowTag then ">" else "&gt;"
+showHtmlContent :: RenderOptions -> Either String Html -> String
+showHtmlContent _ (Left s) = s
+showHtmlContent r (Right h) = toHtml r h
 
 instance ToHtml Html where
-    toHtml r = showHtml (allowedTags r) (allowedAttributes r)
+    toHtml r (PairTag open content) = concat [
+        leftBracket,
+        toHtml r open,
+        rightBracket,
+        concatMap (showHtmlContent r) content,
+        leftBracket ++ "/",
+        tagname open,
+        rightBracket]
+        where
+            allowTag = maybe True (\attrs -> elem (tagname open) attrs) $ allowedTags r
+            leftBracket = if allowTag then "<" else "&lt;"
+            rightBracket = if allowTag then ">" else "&gt;"
+    toHtml r (SingleTag tag) = concat [
+        leftBracket,
+        toHtml r tag,
+        "/" ++ rightBracket]
+        where
+            allowTag = maybe True (\attrs -> elem (tagname tag) attrs) $ allowedTags r
+            leftBracket = if allowTag then "<" else "&lt;"
+            rightBracket = if allowTag then ">" else "&gt;"
