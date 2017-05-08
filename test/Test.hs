@@ -385,7 +385,8 @@ main = do
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1.html" "--em-dashes",
         goldenTest "test/goldens/golden1.md" "test/goldens/golden1-backlinks.html" "--em-dashes --footnote-backlinks",
         goldenTest "test/goldens/golden2.md" "test/goldens/golden2.html" "--em-dashes",
-        goldenTest "test/goldens/golden2.md" "test/goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks"]
+        goldenTest "test/goldens/golden2.md" "test/goldens/golden2-backlinks.html" "--em-dashes --footnote-backlinks",
+        goldenTest "test/goldens/bleach.md" "test/goldens/bleach.html" "--allowed-tags span --allowed-attributes class"]
     if and results
         then exitSuccess
         else exitFailure

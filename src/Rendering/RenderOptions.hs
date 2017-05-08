@@ -11,7 +11,9 @@ data RenderOptions = RenderOptions {
     footnoteBacklinks :: Bool,
     emDashes :: Bool,
     inlineCSS :: Bool,
-    inlineJS :: Bool
+    inlineJS :: Bool,
+    allowedTags :: Maybe [String],
+    allowedAttributes :: Maybe [String]
 } deriving (Generic)
 
 defaultRenderOptions = RenderOptions {
@@ -20,8 +22,14 @@ defaultRenderOptions = RenderOptions {
     footnoteBacklinks = False,
     emDashes = False,
     inlineCSS = False,
-    inlineJS = False
+    inlineJS = False,
+    allowedTags = Nothing,
+    allowedAttributes = Nothing
 }
+
+splitCommas :: String -> [String]
+splitCommas "" = []
+splitCommas s = takeWhile (/= ',') s : splitCommas (dropWhile (/= ',') s)
 
 renderOptions :: [String] -> RenderOptions
 renderOptions [] = defaultRenderOptions
@@ -32,6 +40,8 @@ renderOptions (key : ls) = case key of
     "--em-dashes" -> (renderOptions ls) {emDashes=True}
     "--inline-css" -> (renderOptions ls) {inlineCSS=True}
     "--inline-js" -> (renderOptions ls) {inlineJS=True}
+    "--allowed-tags" -> (renderOptions $ tail ls) {allowedTags=Just $ splitCommas $ head ls}
+    "--allowed-attributes" -> (renderOptions $ tail ls) {allowedAttributes=Just $ splitCommas $ head ls}
 
 getRenderOptions :: IO RenderOptions
 getRenderOptions = fmap renderOptions getArgs
