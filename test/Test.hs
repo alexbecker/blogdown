@@ -297,9 +297,14 @@ testUnclosedTag = expectFailure "unclosed tag should fail to parse" html
 testMismatchedTags = expectFailure "mismatched tags should fail to parse" html
     "<a>hello</b>"
     "mismatched tags: 'a' and 'b'"
-testScriptTag = expectFailure "script tags are not currently supported" html
+testScriptTag = expectFailure "script tags unsafe" html
     "<script></script>"
-    "script tags are not currently supported"
+    "script tags cannot safely be parsed\n\
+    \pass --allow-unsafe-tags to try anyway"
+testStyleTag = expectFailure "style tags unsafe" html
+    "<style></style>"
+    "style tags cannot safely be parsed\n\
+    \pass --allow-unsafe-tags to try anyway"
 testBadTableSeparator = expectFailure "incomplete table separator" block
     "+---+---\n\
     \| a | b |"
@@ -384,6 +389,7 @@ main = do
         testUnclosedTag,
         testMismatchedTags,
         testScriptTag,
+        testStyleTag,
         testBadTableSeparator,
         testBadListNesting,
         goldenTest "Readme.md" "test/goldens/Readme.html" "--em-dashes --inline-css --inline-js",

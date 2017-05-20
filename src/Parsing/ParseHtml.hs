@@ -8,6 +8,10 @@ import Parsing.ParseOptions (allowUnsafeTags)
 import Parsing.State
 import Parsing.Utils
 
+unsafeTags = ["script", "style"]
+unsafeTagErr = " tags cannot safely be parsed\n\
+               \pass --allow-unsafe-tags to try anyway"
+
 htmlTag :: HtmlTagType -> Parser HtmlTag
 htmlTag tagType = do
     if tagType == Close
@@ -18,7 +22,7 @@ htmlTag tagType = do
     let lowerTagname = map toLower tagname
     state <- getState
     let allowUnsafe = allowUnsafeTags $ options state
-    failWithIf "script tags are not currently supported" (not allowUnsafe && lowerTagname == "script")
+    failWithIf (lowerTagname ++ unsafeTagErr) (not allowUnsafe && elem lowerTagname unsafeTags)
     attrs <- many attr
     if tagType == SelfClosing
         then try (string "/>") <?> "closing \"/>\" (self-closing html tag)"
