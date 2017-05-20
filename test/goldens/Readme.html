@@ -24,7 +24,8 @@ With these tools, you can simply run <code>cabal install</code> or <code>stack b
 <p>Because configuring Cabal and Stack can be tricky for Haskell beginners, Blogdown supports installation without any Haskell tooling.</p>
 <p>First, install <a href="https://www.haskell.org/ghc/">GHC</a>, <a href="https://hackage.haskell.org/package/parsec">Parsec</a> and <a href="https://hackage.haskell.org/package/MissingH">MissingH</a>,
 all of which are available through common Linux package managers.
-Then run <code>ghc -isrc -o Blogdown src/Blogdown.hs</code> in the repository's base directory.</p>
+To compile static assets into Haskell files, run <code>ghci Setup.hs</code> and manually invoke <code>compileStaticFiles</code>.
+Then run <code>ghc -isrc -iassets -o Blogdown src/Blogdown.hs</code> in the repository's base directory.</p>
 <h2>Usage</h2>
 <p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
 <pre><code>cat blogpost.md | ./Blogdown &gt; blogpost.html
@@ -42,10 +43,6 @@ These can be inlined using the <code>--inline-css</code> and <code>--inline-js</
 <li><code>--inline-css</code>: If this flag is passed, the recommended CSS will be inlined at the end of the output document.</li>
 <li><code>--inline-js</code>: If this flag is passed, the recommended JS will be inlined at the end of the output document.</li>
 </ul>
-<p><b>Note:</b> The <code>inline-*</code> options require additional files (located in <code>assets</code>) to function.
-These will be installed at a known location if built with Cabal or Stack,
-but if the binary is run on a different machine (e.g. a webserver) then the binary is built on,
-the machine must also have the <code>assets</code> directory, and the directory containing <code>assets</code> should be supplied via the environment variable <code>blogdown_datadir_override</code>.</p>
 <h2>Syntax</h2>
 <h3>Differences from Markdown</h3>
 <p>Most of the syntax of Blogdown should be familiar to Markdown users, but some new syntax has been added, and some existing syntax has changed.</p>

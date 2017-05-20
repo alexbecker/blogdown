@@ -32,7 +32,8 @@ Because configuring Cabal and Stack can be tricky for Haskell beginners, Blogdow
 
 First, install [GHC](https://www.haskell.org/ghc/), [Parsec](https://hackage.haskell.org/package/parsec) and [MissingH](https://hackage.haskell.org/package/MissingH),
 all of which are available through common Linux package managers.
-Then run `ghc -isrc -o Blogdown src/Blogdown.hs` in the repository's base directory.
+To compile static assets into Haskell files, run `ghci Setup.hs` and manually invoke `compileStaticFiles`.
+Then run `ghc -isrc -iassets -o Blogdown src/Blogdown.hs` in the repository's base directory.
 
 ## Usage
 
@@ -55,11 +56,6 @@ These can be inlined using the `--inline-css` and `--inline-js` flags respective
  * `--em-dashes`: If this flag is passed, `--` will be replaced with "&mdash;" in text.
  * `--inline-css`: If this flag is passed, the recommended CSS will be inlined at the end of the output document.
  * `--inline-js`: If this flag is passed, the recommended JS will be inlined at the end of the output document.
-
-**Note:** The `inline-*` options require additional files (located in `assets`) to function.
-These will be installed at a known location if built with Cabal or Stack,
-but if the binary is run on a different machine (e.g. a webserver) then the binary is built on,
-the machine must also have the `assets` directory, and the directory containing `assets` should be supplied via the environment variable `blogdown_datadir_override`.
 
 ## Syntax
 

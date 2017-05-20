@@ -3,3 +3,4 @@
 Test
 Blogdown
 dist
+assets/*.hs

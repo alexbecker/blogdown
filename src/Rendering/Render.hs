@@ -1,33 +1,16 @@
-{-# Language CPP #-}
-
 module Rendering.Render (ToHtml, toHtml) where
 
 import Data.List
 import Data.List.Utils
 import Data.Maybe (isJust, fromJust)
-import System.Environment (lookupEnv)
-import System.IO.Unsafe (unsafePerformIO)
 
 import AST
-#ifdef CABAL
-import Paths_Blogdown
-#endif
+import qualified Footnotes_js as JS
+import qualified Footnotes_css as CSS
 import Rendering.RenderOptions
 
 class ToHtml a where
     toHtml :: RenderOptions -> a -> String
-
-dataFileContents :: FilePath -> String
-dataFileContents relPath = unsafePerformIO $ do
-    dataDirOverride <- lookupEnv "blogdown_datadir_override"
-    if isJust dataDirOverride
-        then readFile $ fromJust dataDirOverride ++ "/" ++ relPath
-        else
-#ifdef CABAL
-            getDataFileName relPath >>= readFile
-#else
-            readFile relPath
-#endif
 
 optionalJS :: RenderOptions -> String
 optionalJS r = if (inlineJS r)
