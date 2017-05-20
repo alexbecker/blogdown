@@ -47,9 +47,8 @@ footnoteRef = do
     identifier <- betweenWithErrors' "^[" "]" "footnote reference" $ many1 $ escapableNoneOf "[]"
     state <- getState
     let f = footnoteIndices state
-    let maybeIndex = M.lookup identifier f
-    if isJust maybeIndex
-        then fail $ "repeated footnote identifier: " ++ (show $ fromJust maybeIndex)
+    if M.member identifier f
+        then fail $ "repeated footnote identifier: " ++ identifier
         else return ()
     let index = M.size f
     let f' = M.insert identifier index f
