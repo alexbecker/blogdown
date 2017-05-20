@@ -14,12 +14,12 @@ class ToHtml a where
 
 optionalJS :: RenderOptions -> String
 optionalJS r = if (inlineJS r)
-    then "<script>" ++ dataFileContents "assets/footnotes.js" ++ "</script>\n"
+    then "<script>" ++ JS.content ++ "</script>\n"
     else ""
 
 optionalCSS :: RenderOptions -> String
 optionalCSS r = if (inlineCSS r)
-    then "<style>" ++ dataFileContents "assets/footnotes.css" ++ "</style>\n"
+    then "<style>" ++ CSS.content ++ "</style>\n"
     else ""
 
 instance ToHtml AST where

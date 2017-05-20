@@ -2,8 +2,8 @@
 
 module Rendering.RenderOptions where
 
+import qualified Data.Map.Strict as M
 import GHC.Generics (Generic)
-import System.Environment
 
 data RenderOptions = RenderOptions {
     footnotePrefix :: String,
@@ -14,7 +14,7 @@ data RenderOptions = RenderOptions {
     inlineJS :: Bool,
     allowedTags :: Maybe [String],
     allowedAttributes :: Maybe [String]
-} deriving (Generic)
+} deriving (Show, Generic)
 
 defaultRenderOptions = RenderOptions {
     footnotePrefix = "",
@@ -31,17 +31,13 @@ splitCommas :: String -> [String]
 splitCommas "" = []
 splitCommas s = takeWhile (/= ',') s : splitCommas (dropWhile (/= ',') s)
 
-renderOptions :: [String] -> RenderOptions
-renderOptions [] = defaultRenderOptions
-renderOptions (key : ls) = case key of
-    "--footnote-prefix" -> (renderOptions $ tail ls) {footnotePrefix=head ls}
-    "--footnote-index-from" -> (renderOptions $ tail ls) {footnoteIndexFrom=read $ head ls}
-    "--footnote-backlinks" -> (renderOptions ls) {footnoteBacklinks=True}
-    "--em-dashes" -> (renderOptions ls) {emDashes=True}
-    "--inline-css" -> (renderOptions ls) {inlineCSS=True}
-    "--inline-js" -> (renderOptions ls) {inlineJS=True}
-    "--allowed-tags" -> (renderOptions $ tail ls) {allowedTags=Just $ splitCommas $ head ls}
-    "--allowed-attributes" -> (renderOptions $ tail ls) {allowedAttributes=Just $ splitCommas $ head ls}
-
-getRenderOptions :: IO RenderOptions
-getRenderOptions = fmap renderOptions getArgs
+renderOptions :: M.Map String ([String] -> RenderOptions -> RenderOptions)
+renderOptions = M.fromList([
+    ("--footnote-prefix", \[x] -> \r -> r {footnotePrefix=x}),
+    ("--footnote-index-from", \[x] -> \r -> r {footnoteIndexFrom=read x}),
+    ("--footnote-backlinks", \[] -> \r -> r {footnoteBacklinks=True}),
+    ("--em-dashes", \[] -> \r -> r {emDashes=True}),
+    ("--inline-css", \[] -> \r -> r {inlineCSS=True}),
+    ("--inline-js", \[] -> \r -> r {inlineJS=True}),
+    ("--allowed-tags", \[x] -> \r -> r {allowedTags=Just $ splitCommas x}),
+    ("--allowed-attributes", \[x] -> \r -> r {allowedAttributes=Just $ splitCommas x})])

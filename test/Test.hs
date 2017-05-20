@@ -4,6 +4,7 @@ import Data.String.Utils
 import Text.Parsec
 import System.Exit
 
+import qualified Options
 import Parsing.Parse
 import Parsing.ParseBlock
 import Parsing.ParseHtml
@@ -312,7 +313,7 @@ testBadListNesting = expectFailure "incorrectly nested lists" ast
 
 goldenTest :: FilePath -> FilePath -> String -> IO Bool
 goldenTest inFilePath goldenFilePath renderArgs = do
-    let r = renderOptions $ words renderArgs
+    let (p, r) = Options.options $ words renderArgs
     input <- readFile inFilePath
     golden <- readFile goldenFilePath
     either
@@ -331,7 +332,7 @@ goldenTest inFilePath goldenFilePath renderArgs = do
                     writeFile failPath rendered
                     putStrLn $ "FAIL: " ++ goldenFilePath
                     return False)
-        $ runParser ast initialState inFilePath input
+        $ runParser ast (initialState {options=p}) inFilePath input
 
 main :: IO ()
 main = do

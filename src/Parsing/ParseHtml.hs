@@ -4,6 +4,7 @@ import Data.Char (toLower)
 import Text.Parsec
 
 import AST
+import Parsing.ParseOptions (allowUnsafeTags)
 import Parsing.State
 import Parsing.Utils
 
@@ -15,7 +16,9 @@ htmlTag tagType = do
     spaces
     tagname <- many1 (letter <?> "rest of tag name") <?> "html tag name"
     let lowerTagname = map toLower tagname
-    failWithIf "script tags are not currently supported" $ lowerTagname == "script"
+    state <- getState
+    let allowUnsafe = allowUnsafeTags $ options state
+    failWithIf "script tags are not currently supported" (not allowUnsafe && lowerTagname == "script")
     attrs <- many attr
     if tagType == SelfClosing
         then try (string "/>") <?> "closing \"/>\" (self-closing html tag)"

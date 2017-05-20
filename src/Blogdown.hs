@@ -1,11 +1,11 @@
 module Main where
 
+import Options
 import Parsing.Parse
 import Rendering.Render
-import Rendering.RenderOptions
 
 main :: IO ()
 main = do
-    renderOptions <- getRenderOptions
+    (parseOptions, renderOptions) <- getOptions
     input <- getContents
-    either (putStrLn . show) (putStr . toHtml renderOptions) $ parse input
+    either (putStrLn . show) (putStr . toHtml renderOptions) $ parse parseOptions input
