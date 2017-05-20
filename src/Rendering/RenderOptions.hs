@@ -31,13 +31,17 @@ splitCommas :: String -> [String]
 splitCommas "" = []
 splitCommas s = takeWhile (/= ',') s : splitCommas (dropWhile (/= ',') s)
 
+getSingleArg :: [String] -> String
+getSingleArg [] = ""
+getSingleArg (x : xs) = x
+
 renderOptions :: M.Map String ([String] -> RenderOptions -> RenderOptions)
 renderOptions = M.fromList([
-    ("--footnote-prefix", \[x] -> \r -> r {footnotePrefix=x}),
-    ("--footnote-index-from", \[x] -> \r -> r {footnoteIndexFrom=read x}),
-    ("--footnote-backlinks", \[] -> \r -> r {footnoteBacklinks=True}),
-    ("--em-dashes", \[] -> \r -> r {emDashes=True}),
-    ("--inline-css", \[] -> \r -> r {inlineCSS=True}),
-    ("--inline-js", \[] -> \r -> r {inlineJS=True}),
-    ("--allowed-tags", \[x] -> \r -> r {allowedTags=Just $ splitCommas x}),
-    ("--allowed-attributes", \[x] -> \r -> r {allowedAttributes=Just $ splitCommas x})])
+    ("--footnote-prefix", \xs -> \r -> r {footnotePrefix=getSingleArg xs}),
+    ("--footnote-index-from", \xs -> \r -> r {footnoteIndexFrom=read $ getSingleArg xs}),
+    ("--footnote-backlinks", \_ -> \r -> r {footnoteBacklinks=True}),
+    ("--em-dashes", \_ -> \r -> r {emDashes=True}),
+    ("--inline-css", \_ -> \r -> r {inlineCSS=True}),
+    ("--inline-js", \_ -> \r -> r {inlineJS=True}),
+    ("--allowed-tags", \xs -> \r -> r {allowedTags=Just $ splitCommas $ getSingleArg xs}),
+    ("--allowed-attributes", \xs -> \r -> r {allowedAttributes=Just $ splitCommas $ getSingleArg xs})])
