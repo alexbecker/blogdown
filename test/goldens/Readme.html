@@ -36,10 +36,20 @@ which improve the appearance of footnotes and allow them to be shown inline.
 These can be inlined using the <code>--inline-css</code> and <code>--inline-js</code> flags respectively<sup><a href="#-footnote-0" id="a--footnote-0">[0]</a></sup>.</p>
 <h3>Optional Flags</h3>
 <p><code>Blogdown</code> accepts the following long-style flags:</p>
-<ul><li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
-<li><code>--footnote-index-from</code>: The index from which footnotes are numbered. Defaults to 0.</li>
-<li><code>--footnote-backlinks</code>: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.</li>
+<ul><li><code>--allowed-tags</code>: Specifies a comma-separated list of HTML tags which should be
+rendered faithfully. All other tags are escaped, e.g. <code>&lt;a&gt;</code> becomes <code>&amp;lt;a&amp;gt;</code>.
+If no list is supplied, all tags are escaped.</li>
+<li><code>--allowed-attributes</code>: Specifies a comma-separated list of HTML attributes which
+should be rendered faithfully. Any other attributes will be stripped from tags when
+they are rendered. If no list is supplied, all attributes are stripped.</li>
+<li><code>--allow-unsafe-tags</code>: By default, Blogdown will fail when it encounters a <code>&lt;script&gt;</code>
+or a <code>&lt;style&gt;</code> tag, because there are certain corner cases it cannot parse correctly,
+e.g. <code>&lt;style&gt;"&lt;/style&gt;"evil()"&lt;style&gt;"&lt;/style&gt;</code>. However, these are unlikely on
+non-malicious input, so this flag can be passed to attempt parsing these tags.</li>
 <li><code>--em-dashes</code>: If this flag is passed, <code>--</code> will be replaced with "&mdash;" in text.</li>
+<li><code>--footnote-backlinks</code>: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.</li>
+<li><code>--footnote-index-from</code>: The index from which footnotes are numbered. Defaults to 0.</li>
+<li><code>--footnote-prefix</code>: Defines a prefix for the <code>id</code>s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid <code>id</code> collisions.</li>
 <li><code>--inline-css</code>: If this flag is passed, the recommended CSS will be inlined at the end of the output document.</li>
 <li><code>--inline-js</code>: If this flag is passed, the recommended JS will be inlined at the end of the output document.</li>
 </ul>
@@ -56,9 +66,34 @@ as this comes at a large cost in the parser implementation<sup><a href="#-footno
 The <code>#</code> syntax for headers is supported instead.</p>
 <p>It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
 The <code>&lt;br/&gt;</code> tag is supported instead.</p>
+<p>While tables are not a feature of base Markdown, some common Markdown implementations
+such as <a href="https://guides.github.com/features/mastering-markdown/#GitHub-flavored-markdown">Github Flavored Markdown</a>
+support them. Blogdown also supports tables, but its implementation is slightly different
+from Github's, requiring <code>|</code> characters at the start and end of a row and using <code>+</code>
+instead of <code>|</code> in the separator between the (optional) table header and table body.</p>
 <p>Since Blogdown introduces new syntax, some valid Markdown will require escaping to render as expected in Blogdown.
 Additionally, while most Markdown implementations do not require escaping many special characters when their special meaning would
 not be valid, Blogdown always requires they be escaped.</p>
+<h3>HTML Embedding</h3>
+<p>Like most Markdown implementations, Blogdown documents can have HTML embedded inside them.
+However, Blogdown allows only a limited subset of HTML, specifically
+<a href="https://www.w3.org/TR/xhtml1">XHTML</a>,
+with the exceptions that unknown tags are permitted, and that any tag
+is allowed to be self-closing<sup><a href="#-footnote-2" id="a--footnote-2">[2]</a></sup>.
+By default Blogdown will not allow <code>&lt;script&gt;</code> or <code>&lt;style&gt;</code> tags, since parsing
+for these is very complex and not fully implemented. However, when parsing trusted
+content it is generally safe to use <code>--allow-unsafe-tags</code> to attempt to allow
+these anyway.</p>
+<p>Note also that any content within an HTML node is rendered verbatim, so Blogdown features
+cannot be used inside HTML nodes.</p>
+<h4>HTML Bleaching</h4>
+<p>If using Blogdown to parse <i>untrusted</i> content (such as comments on a blog),
+the <code>--allowed-tags</code> and <code>--allowed-attributes</code> flags <b>must</b> be used to restrict what
+HTML can be rendered in the output. Generally these flags should be used without
+without arguments, bleaching all HTML. If you must allow some HTML, you should only
+allow tags and attributes which are necessary for your use case and which you understand
+the security implications of.</p>
+<p>The <code>--allow-unsafe-tags</code> <b>must not</b> with untrusted content.</p>
 <h3>Formal Description</h3>
 <p>The body of a Blogdown document consists of a sequence of <i>block nodes</i>, which in turn consist of <i>inline nodes</i>.</p>
 <h4>Block Nodes</h4>
@@ -79,9 +114,9 @@ For example, this sublist begins with <code>  * </code>.</li>
 <li><b>Unordered Lists</b>: A <code> * </code> begins an unordered list item, which itself is a block.
 Sequential unordered list items or sublists form an unordered list.
 List items can contain arbitrary inline nodes.</li>
-<ul><li>Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
-For example, this sublist begins with <code>  * </code>.</li>
-</ul>
+<ol><li>Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with <code>  - </code>.</li>
+</ol>
 <li><b>Blockquote</b>: Lines beginning with <code>&gt; </code> define a blockquote.
 Can contain arbitrary inline nodes.
 Note that the first line not beginning with <code>&gt; </code> will start a new block.</li>
@@ -112,7 +147,7 @@ The <i>href</i> portion is the link destination, and is parsed verbatim except t
 <li><b>Image</b>: A image is written as ![<i>alt</i>](<i>src</i>). The <i>alt</i> and <i>src</i> values are parsed verbatim except that any literal
 <code>[</code> or <code>]</code> in the <i>alt</i> value and <code>(</code> or <code>)</code> in the <i>src</i> value must be escaped.</li>
 <li><b>Footnote Reference</b>: Writing ^[<i>footnote-name</i>] defines a footnote reference.
-It is rendered as a superscript footnote number<sup><a href="#-footnote-2" id="a--footnote-2">[2]</a></sup>, and links to the footnote named <i>footnote-name</i>
+It is rendered as a superscript footnote number<sup><a href="#-footnote-3" id="a--footnote-3">[3]</a></sup>, and links to the footnote named <i>footnote-name</i>
 if it is present in the footer.</li>
 </ul>
 <h4>Footer</h4>
@@ -125,13 +160,14 @@ A backslash before a newline acts as a continuation character.</p>
 <h2>Planned improvements</h2>
 <ul><li>Better error messages on parse failures</li>
 <li>Windows support</li>
-<li>Document building & running tests</li>
 <li>Comments</li>
 </ul>
 <ol start="0" class="footnotes"><li id="-footnote-0"><p>Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.
 Doing so will degrade network and browser performance slightly.</p></li>
 <li id="-footnote-1"><p>Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.</p></li>
-<li id="-footnote-2"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
+<li id="-footnote-2"><p>Arbitrary tags are allowed for ease of implementation,
+although they are also potentially useful, e.g. for Angular support.</p></li>
+<li id="-footnote-3"><p>Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the <code>--footnote-index-from</code> flag).</p></li>
 </ol>
 <style>.footnotes > li {
     margin: 15px 0;

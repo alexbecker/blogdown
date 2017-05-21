@@ -50,10 +50,20 @@ These can be inlined using the `--inline-css` and `--inline-js` flags respective
 ### Optional Flags
 
 `Blogdown` accepts the following long-style flags:
- * `--footnote-prefix`: Defines a prefix for the `id`s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid `id` collisions.
- * `--footnote-index-from`: The index from which footnotes are numbered. Defaults to 0.
- * `--footnote-backlinks`: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.
+ * `--allowed-tags`: Specifies a comma-separated list of HTML tags which should be
+rendered faithfully. All other tags are escaped, e.g. `<a>` becomes `&amp;lt;a&amp;gt;`.
+If no list is supplied, all tags are escaped.
+ * `--allowed-attributes`: Specifies a comma-separated list of HTML attributes which
+should be rendered faithfully. Any other attributes will be stripped from tags when
+they are rendered. If no list is supplied, all attributes are stripped.
+ * `--allow-unsafe-tags`: By default, Blogdown will fail when it encounters a `<script>`
+or a `<style>` tag, because there are certain corner cases it cannot parse correctly,
+e.g. `<style>"</style>"evil()"<style>"</style>`. However, these are unlikely on
+non-malicious input, so this flag can be passed to attempt parsing these tags.
  * `--em-dashes`: If this flag is passed, `--` will be replaced with "&mdash;" in text.
+ * `--footnote-backlinks`: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.
+ * `--footnote-index-from`: The index from which footnotes are numbered. Defaults to 0.
+ * `--footnote-prefix`: Defines a prefix for the `id`s of footnotes. Recommended if multiple output files are included in a single HTML page, to avoid `id` collisions.
  * `--inline-css`: If this flag is passed, the recommended CSS will be inlined at the end of the output document.
  * `--inline-js`: If this flag is passed, the recommended JS will be inlined at the end of the output document.
 
@@ -78,9 +88,41 @@ The `#` syntax for headers is supported instead.
 It also does not support using multiple trailing spaces to force a breakpoint at the end of a line.
 The `<br/>` tag is supported instead.
 
+While tables are not a feature of base Markdown, some common Markdown implementations
+such as [Github Flavored Markdown](https://guides.github.com/features/mastering-markdown/#GitHub-flavored-markdown)
+support them. Blogdown also supports tables, but its implementation is slightly different
+from Github's, requiring `|` characters at the start and end of a row and using `+`
+instead of `|` in the separator between the (optional) table header and table body.
+
 Since Blogdown introduces new syntax, some valid Markdown will require escaping to render as expected in Blogdown.
 Additionally, while most Markdown implementations do not require escaping many special characters when their special meaning would
 not be valid, Blogdown always requires they be escaped.
+
+### HTML Embedding
+
+Like most Markdown implementations, Blogdown documents can have HTML embedded inside them.
+However, Blogdown allows only a limited subset of HTML, specifically
+[XHTML](https://www.w3.org/TR/xhtml1),
+with the exceptions that unknown tags are permitted, and that any tag
+is allowed to be self-closing^[arbitrary-tags].
+By default Blogdown will not allow `<script>` or `<style>` tags, since parsing
+for these is very complex and not fully implemented. However, when parsing trusted
+content it is generally safe to use `--allow-unsafe-tags` to attempt to allow
+these anyway.
+
+Note also that any content within an HTML node is rendered verbatim, so Blogdown features
+cannot be used inside HTML nodes.
+
+#### HTML Bleaching
+
+If using Blogdown to parse *untrusted* content (such as comments on a blog),
+the `--allowed-tags` and `--allowed-attributes` flags **must** be used to restrict what
+HTML can be rendered in the output. Generally these flags should be used without
+without arguments, bleaching all HTML. If you must allow some HTML, you should only
+allow tags and attributes which are necessary for your use case and which you understand
+the security implications of.
+
+The `--allow-unsafe-tags` **must not** with untrusted content.
 
 ### Formal Description
 
@@ -105,8 +147,8 @@ For example, this sublist begins with `  * `.
  * **Unordered Lists**: A ` * ` begins an unordered list item, which itself is a block.
 Sequential unordered list items or sublists form an unordered list.
 List items can contain arbitrary inline nodes.
-  * Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
-For example, this sublist begins with `  * `.
+  - Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with `  - `.
  * **Blockquote**: Lines beginning with `> ` define a blockquote.
 Can contain arbitrary inline nodes.
 Note that the first line not beginning with `> ` will start a new block.
@@ -156,12 +198,14 @@ A backslash before a newline acts as a continuation character.
 ## Planned improvements
  * Better error messages on parse failures
  * Windows support
- * Document building & running tests
  * Comments
 
 ~[inline] Inlining CSS and JS is not recommended if you will be rendering multiple Blogdown documents on a single page, e.g. multiple blog posts on a blog.
 Doing so will degrade network and browser performance slightly.
 
 ~[underline-parser-complexity] Supporting underlines for headers requires the parser to look-ahead arbitrarily far, resulting in quadratic time complexity.
+
+~[arbitrary-tags] Arbitrary tags are allowed for ease of implementation,
+although they are also potentially useful, e.g. for Angular support.
 
 ~[footnote-numbering] Footnotes are auto-numbered in order of appearance, starting from 0 by default (this can be changed by passing the `--footnote-index-from` flag).
