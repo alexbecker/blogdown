@@ -4,12 +4,13 @@ import Criterion.Main
 import Data.Either
 import Data.String.Utils (replace)
 
-import Parsing.Parse
-import Rendering.Render
-import Rendering.RenderOptions
+import Parsing.Parse (parse)
+import Parsing.ParseOptions (defaultParseOptions)
+import Rendering.Render (toHtml)
+import Rendering.RenderOptions (RenderOptions, defaultRenderOptions, inlineCSS, inlineJS)
 
 parseAndRender :: RenderOptions -> String -> String
-parseAndRender options = either show (toHtml options) . parse
+parseAndRender options = either show (toHtml options) . parse defaultParseOptions
 
 main :: IO ()
 main = do
