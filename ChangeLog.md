@@ -1,5 +1,10 @@
 # Revision history for Blogdown
 
+### 0.2.1 -- 2017-05-21
+
+* Fix cabal build.
+* Fix benchmarks.
+
 ## 0.2.0 -- 2017-05-21
 
 * Add image support.
