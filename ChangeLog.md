@@ -1,5 +1,14 @@
 # Revision history for Blogdown
 
+## 0.2.0 -- 2017-05-21
+
+* Add image support.
+* Add nested list support.
+* Allow implicit link hrefs.
+* Support HTML bleaching.
+* Abort parsing script or style tags unless --allow-unsafe-tags is passed.
+* Build assets at compile time instead of accessing them at run time.
+
 ### 0.1.1 -- 2017-04-10
 
 * Allow overriding the directory for assets via environment variable.
