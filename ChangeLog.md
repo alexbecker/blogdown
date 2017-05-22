@@ -1,5 +1,9 @@
 # Revision history for Blogdown
 
+### 0.2.2 -- 2017-05-21
+
+* Add missing other-modules.
+
 ### 0.2.1 -- 2017-05-21
 
 * Fix cabal build.
