@@ -142,13 +142,13 @@ Can contain arbitrary inline nodes.
  * **Ordered Lists**: A ` - ` begins an ordered list item, which itself is a block.
 Sequential ordered list items or sublists form an ordered list.
 List items can contain arbitrary inline nodes.
-  * Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
-For example, this sublist begins with `  * `.
+  - Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with `  - `.
  * **Unordered Lists**: A ` * ` begins an unordered list item, which itself is a block.
 Sequential unordered list items or sublists form an unordered list.
 List items can contain arbitrary inline nodes.
-  - Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
-For example, this sublist begins with `  - `.
+  * Sublists are created when list items begin with one more space than their parent list, and can be ordered or unordered.
+For example, this sublist begins with `  * `.
  * **Blockquote**: Lines beginning with `> ` define a blockquote.
 Can contain arbitrary inline nodes.
 Note that the first line not beginning with `> ` will start a new block.
