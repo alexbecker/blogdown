@@ -2,7 +2,7 @@ module Rendering.Render (ToHtml, toHtml) where
 
 import Data.List
 import Data.List.Utils
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (isNothing, isJust, fromJust)
 
 import AST
 import qualified Footnotes_js as JS
@@ -46,6 +46,11 @@ escapeHtml = concatMap escapeChar where
     escapeChar '>' = "&gt;"
     escapeChar c = [c]
 
+escapeQuotes :: String -> String
+escapeQuotes = concatMap escapeChar where
+    escapeChar '"' = "&quot;"
+    escapeChar c = [c]
+
 instance ToHtml FootnoteDefs where
     toHtml r (FootnoteDefs fs) = withTagAttrs "ol"
         [("start", show $ footnoteIndexFrom r), ("class", "footnotes")]
@@ -69,7 +74,10 @@ instance ToHtml Block where
     toHtml r (Header level text) = withTag ("h" ++ show level) $ stripEndingNewline $ concatMap (toHtml r) text
     toHtml r (ListBlock l) = toHtml r l
     toHtml r (BlockQuote ls) = withTag "blockquote" $ stripEndingNewline $ concatMap (toHtml r) ls
-    toHtml _ (BlockCode s) = withTag "pre" $ withTag "code" $ escapeHtml s
+    toHtml _ (BlockCode "" s) = withTag "pre" $ withTag "code" $ escapeHtml s
+    toHtml r (BlockCode cls s) = withTag "pre" $ if isAllowedTag "class" r
+        then withTagAttrs "code" [("class", escapeQuotes cls)] $ escapeHtml s
+        else withTag "code" $ escapeHtml s
     toHtml r (BlockHtml h) = toHtml r h
     toHtml r (Table Nothing trs) = withTag "table" $ withTag "tbody" body where
         body = unlines $ map (toHtml r) trs
@@ -110,7 +118,7 @@ instance ToHtml Inline where
 instance ToHtml HtmlTag where
     toHtml r (HtmlTag name attrs) = unwords (name : (map showAttr filteredAttrs)) where
         showAttr (Attr s t) = s ++ "=\"" ++ t ++ "\""
-        filteredAttrs = maybe attrs (\allowed -> filter (\(Attr name val) -> elem name allowed) attrs) $ allowedAttributes r
+        filteredAttrs = filter (\(Attr name val) -> isAllowedAttribute name r) attrs
 
 showHtmlContent :: RenderOptions -> Either String Html -> String
 showHtmlContent _ (Left s) = s
@@ -126,7 +134,7 @@ instance ToHtml Html where
         tagname open,
         rightBracket]
         where
-            allowTag = maybe True (\attrs -> elem (tagname open) attrs) $ allowedTags r
+            allowTag = isAllowedTag (tagname open) r
             leftBracket = if allowTag then "<" else "&lt;"
             rightBracket = if allowTag then ">" else "&gt;"
     toHtml r (SingleTag tag) = concat [
@@ -134,6 +142,6 @@ instance ToHtml Html where
         toHtml r tag,
         "/" ++ rightBracket]
         where
-            allowTag = maybe True (\attrs -> elem (tagname tag) attrs) $ allowedTags r
+            allowTag = isAllowedTag (tagname tag) r
             leftBracket = if allowTag then "<" else "&lt;"
             rightBracket = if allowTag then ">" else "&gt;"

@@ -3,6 +3,7 @@
 module Rendering.RenderOptions where
 
 import qualified Data.Map.Strict as M
+import Data.Maybe (isNothing, fromJust)
 import GHC.Generics (Generic)
 
 data RenderOptions = RenderOptions {
@@ -26,6 +27,12 @@ defaultRenderOptions = RenderOptions {
     allowedTags = Nothing,
     allowedAttributes = Nothing
 }
+
+isAllowedTag :: String -> RenderOptions -> Bool
+isAllowedTag tag r = isNothing (allowedTags r) || elem tag (fromJust $ allowedTags r)
+
+isAllowedAttribute :: String -> RenderOptions -> Bool
+isAllowedAttribute attr r = isNothing (allowedAttributes r) || elem attr (fromJust $ allowedAttributes r)
 
 splitCommas :: String -> [String]
 splitCommas "" = []

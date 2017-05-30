@@ -59,8 +59,16 @@ blockQuote = fmap BlockQuote $ do
 blockCodeLineStart :: Parser String
 blockCodeLineStart = try (string "\t" <|> string "    ") <?> "\"    \" or tab (code block)"
 
-blockCode :: Parser Block
-blockCode = fmap (BlockCode . unlines) $ many1 $ blockCodeLineStart >> manyTill (noneOf "\n") (char' '\n')
+blockCodeIndented :: Parser Block
+blockCodeIndented = fmap (BlockCode "" . unlines) $ many1 $ blockCodeLineStart >> manyTill (noneOf "\n") (char' '\n')
+
+blockCodeFenced :: Parser Block
+blockCodeFenced = do
+    try $ string' "```" -- Backtrack to handle inline code at the start of a line.
+    cls <- manyTill (noneOf "\n") (char' '\n')
+    content <- many (escapableNoneOf "`")
+    string' "```"
+    return $ BlockCode cls content
 
 blockHtml :: Parser Block
 blockHtml = fmap BlockHtml html
@@ -93,4 +101,12 @@ block :: Parser Block
 block = between
     (many $ char '\n')
     (many $ char '\n')
-    (choice [blockHtml, hardRule, header, listBlock, blockQuote, table, blockCode, paragraph])
+    (choice [blockHtml,
+             hardRule,
+             header,
+             listBlock,
+             blockQuote,
+             table,
+             blockCodeIndented,
+             blockCodeFenced,
+             paragraph])

@@ -125,13 +125,13 @@ testBlockQuotePreFormatted = expectSuccess "blockquote pre-formatted" blockQuote
     "<blockquote>    \"This is it... this is where I belong...\"\n\
     \    I know everyone here... even if I've never met them, never talked to\n\
     \them, may never hear from them again... I know you all...</blockquote>"
-testBlockCode = expectSuccess "block code" blockCode
+testBlockCodeIndented = expectSuccess "block code (indented)" blockCodeIndented
     "    var x = 0;\n\
     \    alert(x);\n"
     "<pre><code>var x = 0;\n\
     \alert(x);\n\
     \</code></pre>"
-testBlockCodeWhitespace = expectSuccess "block code handles starting whitespace correctly" blockCode
+testBlockCodeWhitespace = expectSuccess "block code handles starting whitespace correctly" blockCodeIndented
     "    def f(x):\n\
     \        return x\n"
     "<pre><code>def f(x):\n\
@@ -142,6 +142,38 @@ testBlockCodeSpecialChars = expectSuccess "any line beginning with four spaces s
     \    * 1"
     "<pre><code>&gt; print(1)\n\
     \* 1\n\
+    \</code></pre>"
+testBlockCodeFenced = expectSuccess "block code (fenced)" blockCodeFenced
+    "```\n\
+    \def f(x):\n\
+    \    return x\n\
+    \```"
+    "<pre><code>def f(x):\n\
+    \    return x\n\
+    \</code></pre>"
+testBlockCodeWithClass = expectSuccess "block code with a class applied" blockCodeFenced
+    "```python\n\
+    \def f(x):\n\
+    \    return x\n\
+    \```"
+    "<pre><code class=\"python\">def f(x):\n\
+    \    return x\n\
+    \</code></pre>"
+testBlockCodeFencedSpecialChars = expectSuccess "block code (fenced) treats special characters within the content as regular text" blockCodeFenced
+    "```\n\
+    \> print(1)\n\
+    \* 1\n\
+    \```"
+    "<pre><code>&gt; print(1)\n\
+    \* 1\n\
+    \</code></pre>"
+testBlockCodeEscapeClass = expectSuccess "block code with a class escapes it properly" blockCodeFenced
+    "```\"><script>alert(1)</script><div class=\"\n\
+    \def f(x):\n\
+    \    return x\n\
+    \```"
+    "<pre><code class=\"&quot;><script>alert(1)</script><div class=&quot;\">def f(x):\n\
+    \    return x\n\
     \</code></pre>"
 testBlockHtml = expectSuccess "block html" blockHtml
     "<div class=\"class\">\n\
@@ -367,9 +399,13 @@ main = do
         testNestedList,
         testBlockQuote,
         testBlockQuotePreFormatted,
-        testBlockCode,
+        testBlockCodeIndented,
         testBlockCodeWhitespace,
         testBlockCodeSpecialChars,
+        testBlockCodeFenced,
+        testBlockCodeWithClass,
+        testBlockCodeFencedSpecialChars,
+        testBlockCodeEscapeClass,
         testBlockHtml,
         testTable,
         testTableHeader,

@@ -31,7 +31,10 @@ data Block = HardRule
            | Header Int [Inline]
            | ListBlock List
            | BlockQuote [Inline]
-           | BlockCode String
+           | BlockCode {
+    codeClass :: String,
+    codeContent :: String
+}
            | BlockHtml Html
            | Table {
     thead :: Maybe [TableRow],
