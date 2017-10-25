@@ -127,7 +127,7 @@ showHtmlContent r (Right h) = toHtml r h
 instance ToHtml Html where
     toHtml r (PairTag open content) = concat [
         leftBracket,
-        toHtml r open,
+        openTagRendered,
         rightBracket,
         concatMap (showHtmlContent r) content,
         leftBracket ++ "/",
@@ -137,11 +137,15 @@ instance ToHtml Html where
             allowTag = isAllowedTag (tagname open) r
             leftBracket = if allowTag then "<" else "&lt;"
             rightBracket = if allowTag then ">" else "&gt;"
+            -- Strip attribute if the tag is escaped, so attribute content is not interpreted as HTML.
+            openTagRendered = if allowTag then toHtml r open else tagname open
     toHtml r (SingleTag tag) = concat [
         leftBracket,
-        toHtml r tag,
+        tagRendered,
         "/" ++ rightBracket]
         where
             allowTag = isAllowedTag (tagname tag) r
             leftBracket = if allowTag then "<" else "&lt;"
             rightBracket = if allowTag then ">" else "&gt;"
+            -- Strip attribute if the tag is escaped, so attribute content is not interpreted as HTML.
+            tagRendered = if allowTag then toHtml r tag else tagname tag
