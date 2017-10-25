@@ -75,7 +75,7 @@ instance ToHtml Block where
     toHtml r (ListBlock l) = toHtml r l
     toHtml r (BlockQuote ls) = withTag "blockquote" $ stripEndingNewline $ concatMap (toHtml r) ls
     toHtml _ (BlockCode "" s) = withTag "pre" $ withTag "code" $ escapeHtml s
-    toHtml r (BlockCode cls s) = withTag "pre" $ if isAllowedTag "class" r
+    toHtml r (BlockCode cls s) = withTag "pre" $ if isAllowedAttribute "class" r
         then withTagAttrs "code" [("class", escapeQuotes cls)] $ escapeHtml s
         else withTag "code" $ escapeHtml s
     toHtml r (BlockHtml h) = toHtml r h
