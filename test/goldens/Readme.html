@@ -15,7 +15,7 @@ Blogdown cannot be 100% compatible with even a majority of Markdown implementati
 While there have been attemps to create a common Markdown standard&mdash;most notably <a href="http://commonmark.org/">CommonMark</a>&mdash;they
 are necessarily quite complex. The primary cause of this complexity is that Markdown insists on rendering <i>something</i> for every input,
 no matter how malformed. Blogdown is considerably simpler, and hopefully easier for authors to debug, because it fails on malformed inputs.
-With full compatability out of the window, I have chosen to make some other small improvements on Markdown syntax.</p>
+With full compatibility out of the window, I have chosen to make some other small improvements on Markdown syntax.</p>
 <h2>Installation</h2>
 <h3>With Cabal or Stack</h3>
 <p>The recommended way to install any Haskell project is using <a href="https://www.haskell.org/cabal/">Cabal</a> or <a href="https://docs.haskellstack.org/en/stable/README/">Stack</a>.
@@ -30,6 +30,7 @@ Then run <code>ghc -isrc -iassets -o Blogdown src/Blogdown.hs</code> in the repo
 <p>The <code>Blogdown</code> binary reads from <code>stdin</code> and writes to <code>stdout</code>. Typical usage looks like:</p>
 <pre><code>cat blogpost.md | ./Blogdown &gt; blogpost.html
 </code></pre>
+<p>If using <code>Blogdown</code> to process untrusted input for display in a web page, you <b>must</b> use the <code>--allowed-tags</code> and <code>--allowed-attributes</code> flags.</p>
 <h3>Optional Styling and Scripts</h3>
 <p>It is recommended to include <code>footnotes.css</code> and <code>footnotes.js</code> on any pages which make use of Blogdown-generated footnotes,
 which improve the appearance of footnotes and allow them to be shown inline.
@@ -123,6 +124,7 @@ Note that the first line not beginning with <code>&gt; </code> will start a new 
 <li><b>Code Block</b>: Lines indented with 4+ spaces or a tab define a code block.
 Code blocks are rendered verbatim, ignoring special characters.
 Note that the first un-indented line will start a new block.</li>
+<li><b>Code Block (GitHub style)</b>: A line consisting of <code>```</code> followed by an optional class name will also start a code block, which is ended by a line consisting of <code>```</code>. The class name will be added to the <code>code</code> tag (unless disallowed by <code>--allowed-attributes</code>) and is intended to support code highlighting libraries.</li>
 <li><b>HTML Block</b>: An HTML tag at the beginning of a line starts an HTML block.
 Its contents must be valid HTML, and it is ended by the corresponding closing tag.
 HTML blocks are rendered verbatim, unless HTML bleaching is enabled.</li>

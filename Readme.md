@@ -17,7 +17,7 @@ Blogdown cannot be 100% compatible with even a majority of Markdown implementati
 While there have been attemps to create a common Markdown standard--most notably [CommonMark](http://commonmark.org/)--they
 are necessarily quite complex. The primary cause of this complexity is that Markdown insists on rendering *something* for every input,
 no matter how malformed. Blogdown is considerably simpler, and hopefully easier for authors to debug, because it fails on malformed inputs.
-With full compatability out of the window, I have chosen to make some other small improvements on Markdown syntax.
+With full compatibility out of the window, I have chosen to make some other small improvements on Markdown syntax.
 
 ## Installation
 
@@ -40,6 +40,8 @@ Then run `ghc -isrc -iassets -o Blogdown src/Blogdown.hs` in the repository's ba
 The `Blogdown` binary reads from `stdin` and writes to `stdout`. Typical usage looks like:
 
     cat blogpost.md | ./Blogdown > blogpost.html
+
+If using `Blogdown` to process untrusted input for display in a web page, you **must** use the `--allowed-tags` and `--allowed-attributes` flags.
 
 ### Optional Styling and Scripts
 
@@ -155,6 +157,7 @@ Note that the first line not beginning with `> ` will start a new block.
  * **Code Block**: Lines indented with 4+ spaces or a tab define a code block.
 Code blocks are rendered verbatim, ignoring special characters.
 Note that the first un-indented line will start a new block.
+ * **Code Block (GitHub style)**: A line consisting of `\`\`\`` followed by an optional class name will also start a code block, which is ended by a line consisting of `\`\`\``. The class name will be added to the `code` tag (unless disallowed by `--allowed-attributes`) and is intended to support code highlighting libraries.
  * **HTML Block**: An HTML tag at the beginning of a line starts an HTML block.
 Its contents must be valid HTML, and it is ended by the corresponding closing tag.
 HTML blocks are rendered verbatim, unless HTML bleaching is enabled.
