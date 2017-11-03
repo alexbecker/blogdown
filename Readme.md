@@ -60,7 +60,7 @@ should be rendered faithfully. Any other attributes will be stripped from tags w
 they are rendered. If no list is supplied, all attributes are stripped.
  * `--allow-unsafe-tags`: By default, Blogdown will fail when it encounters a `<script>`
 or a `<style>` tag, because there are certain corner cases it cannot parse correctly,
-e.g. `<style>"</style>"evil()"<style>"</style>`. However, these are unlikely on
+e.g. `<script>"</script>"evil()"<script>"</script>`. However, these are unlikely on
 non-malicious input, so this flag can be passed to attempt parsing these tags.
  * `--em-dashes`: If this flag is passed, `--` will be replaced with "&mdash;" in text.
  * `--footnote-backlinks`: If this flag is passed, footnotes will be preceded by a caret linking back to the point where the footnote is referenced.
