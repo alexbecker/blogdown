@@ -7,7 +7,7 @@ import Parsing.ParseOptions
 
 data ParserState = ParserState {
     prevCharIsNewline :: Bool,
-    skipPrefix :: Parser String,
+    skipPrefix :: Maybe (Parser String),
     inlineParserStack :: [String],
     footnoteIndices :: M.Map String Int,
     options :: ParseOptions
@@ -16,7 +16,7 @@ type Parser = Parsec String ParserState
 
 initialState = ParserState{
     prevCharIsNewline=False,
-    skipPrefix=string "",
+    skipPrefix=Nothing,
     inlineParserStack=[],
     footnoteIndices=M.fromList [],
     options=defaultParseOptions

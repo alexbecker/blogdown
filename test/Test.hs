@@ -125,6 +125,13 @@ testBlockQuotePreFormatted = expectSuccess "blockquote pre-formatted" blockQuote
     "<blockquote>    \"This is it... this is where I belong...\"\n\
     \    I know everyone here... even if I've never met them, never talked to\n\
     \them, may never hear from them again... I know you all...</blockquote>"
+testBlockQuoteBlankLines = expectSuccess "blockquote with blank lines" blockQuote
+    "> a. A\n\
+    \> \n\
+    \> b. B"
+    "<blockquote>a. A\n\
+    \\n\
+    \b. B</blockquote>"
 testBlockCodeIndented = expectSuccess "block code (indented)" blockCodeIndented
     "    var x = 0;\n\
     \    alert(x);\n"
@@ -399,6 +406,7 @@ main = do
         testNestedList,
         testBlockQuote,
         testBlockQuotePreFormatted,
+        testBlockQuoteBlankLines,
         testBlockCodeIndented,
         testBlockCodeWhitespace,
         testBlockCodeSpecialChars,

@@ -1,5 +1,6 @@
 module Parsing.Text (plaintext) where
 
+import Data.List.Utils (endswith)
 import Data.Maybe
 import Text.Parsec
 
@@ -32,13 +33,11 @@ nonSpecials :: Parser String
 nonSpecials = do
     state <- getState
     str <- if prevCharIsNewline state
-        then do
-            s <- skipPrefix state
-            if null s
-                then do
-                    c <- nonSpecial firstCharSpecials
-                    return [c]
-                else return s
+        then if isJust (skipPrefix state)
+            then (fromJust $ skipPrefix state) >> return ""
+            else do
+                c <- nonSpecial firstCharSpecials
+                return [c]
         else do
             s <- many $ nonSpecial ('\n' : specials)
             c <- suppressErr (optionMaybe $ char '\n')
@@ -47,7 +46,7 @@ nonSpecials = do
                 else if null s
                     then fail ""    -- Don't succeed without consuming any input.
                     else return s
-    putState $ state {prevCharIsNewline=(last str == '\n')}
+    putState $ state {prevCharIsNewline=(endswith "\n" str)}
     return str
 
 -- Parse as many non-special characters as possible.

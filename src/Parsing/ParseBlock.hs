@@ -48,13 +48,13 @@ list ordered depth = do
 listBlock :: Parser Block
 listBlock = fmap ListBlock (list True 1 <|> list False 1)
 
-blockQuoteLineStart :: Parser String
-blockQuoteLineStart = try (string "> ") <?> "\"> \" (blockquote)"
+blockQuotePrefix :: Parser String
+blockQuotePrefix = try (string' "> ") <?> "\"> \" (blockquote)"
 
 blockQuote :: Parser Block
 blockQuote = fmap BlockQuote $ do
-    blockQuoteLineStart
-    withModifiedState (many1 inline) $ \s -> s {prevCharIsNewline=False, skipPrefix=(blockQuoteLineStart >> many (char ' '))}
+    blockQuotePrefix
+    withModifiedState (many1 inline) $ \s -> s {skipPrefix=Just blockQuotePrefix}
 
 blockCodeLineStart :: Parser String
 blockCodeLineStart = try (string "\t" <|> string "    ") <?> "\"    \" or tab (code block)"
