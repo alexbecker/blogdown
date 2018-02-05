@@ -1,5 +1,13 @@
 # Revision history for Blogdown
 
+### 0.2.4 -- 2018-02-04
+
+* Fix parsing blank lines in blockquotes.
+
+### 0.2.3 -- 2017-10-24
+
+* Fix potential XSS vulnerability.
+
 ### 0.2.2 -- 2017-05-21
 
 * Add missing other-modules.
