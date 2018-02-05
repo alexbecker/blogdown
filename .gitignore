@@ -1,6 +1,5 @@
 *.hi
 *.o
-Test
-Blogdown
 dist
 assets/*.hs
+.stack-work
