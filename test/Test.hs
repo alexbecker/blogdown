@@ -1,4 +1,4 @@
-module Test where
+module Main where
 
 import Data.Either
 import Text.Parsec
@@ -61,6 +61,9 @@ testHashInParagraph = expectSuccess "paragraph containing literal '#'" paragraph
     \containing '#'\n"
     "<p>This is a paragraph\n\
     \containing '#'</p>"
+testExponentInParagraph = expectSuccess "equation, not footnote" paragraph
+    "a\\^2 + 1"
+    "<p>a^2 + 1</p>"
 testOrderedList = expectSuccess "ol" orderedList
     " - point 1\n\
     \ - point 2\n"
@@ -228,6 +231,7 @@ main = do
     testParagraph
     testEscapeCharacters
     testHashInParagraph
+    testExponentInParagraph 
     testOrderedList
     testUnorderedList
     testBlockQuote
