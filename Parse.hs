@@ -2,8 +2,8 @@ module Parse where
 
 import Data.List
 import Data.Maybe
-import Text.Parsec
-import Text.Parsec.Char
+import Text.Parsec hiding (string')
+import Text.Parsec.Char hiding (string')
 import qualified Data.Map.Strict as M
 
 import AST
