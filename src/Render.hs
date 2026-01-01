@@ -1,11 +1,9 @@
 module Render where
 
-import Control.Monad.State.Lazy
 import Data.List
 import Data.List.Utils
 import Data.Maybe
 import qualified Data.Map.Strict as M
-import qualified Data.Text as T
 
 import AST
 import RenderOptions
