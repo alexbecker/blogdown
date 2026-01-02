@@ -3,3 +3,5 @@
 dist
 assets/*.hs
 .stack-work
+.cabal-sandbox/
+Test
