@@ -2,7 +2,7 @@ module Parsing.ParseInline (inline) where
 
 import Data.Maybe
 import Network.URI (isURI)
-import Text.Parsec
+import Text.Parsec hiding (char', string')
 import qualified Data.Map.Strict as M
 
 import AST

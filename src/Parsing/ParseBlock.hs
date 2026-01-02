@@ -1,6 +1,6 @@
 module Parsing.ParseBlock where
 
-import Text.Parsec
+import Text.Parsec hiding (char', string')
 
 import AST
 import Parsing.State
